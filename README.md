@@ -9,4 +9,4 @@ Game framework used is [ggez](https://ggez.rs/).
 
 ## Disclaimer
 The game is fully functional and without any known (functional) bugs.
-But it's not finished yet: there are various [improvements and refactorings](https://github.com/rdrmic/color-columns/issues) to be done.
+But it's not completely finished yet: there are various [improvements and refactorings](https://github.com/rdrmic/color-columns/issues) to be done.
