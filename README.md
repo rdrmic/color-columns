@@ -1,7 +1,7 @@
 # Color Columns
 Falling-blocks type 2D game with a simple gameplay
 [![Gameplay screenshot](github-resources/cc_gameplay_0.png)]
-(github-resources/cc_gameplay_0.png)
+[(github-resources/cc_gameplay_0.png)]
 
 ## About
 The game is a remake of various old, 'classic', columns-like games.
