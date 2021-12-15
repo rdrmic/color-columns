@@ -1,5 +1,5 @@
 # Color Columns
-A falling-blocks-type 2D game with a simple, yet contagious, gameplay
+A falling-blocks-type 2D game with a simple but addictive gameplay
 
 ![Gameplay screenshot](github-resources/cc_gameplay.png)
 
