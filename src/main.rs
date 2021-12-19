@@ -1,6 +1,9 @@
+//#![warn(clippy::all, clippy::pedantic)]
+#![windows_subsystem = "windows"]
+
 use std::{env, mem, path::PathBuf};
 
-use winit::dpi::LogicalPosition;
+//use winit::dpi::LogicalPosition;
 
 use ggez::{
     conf::WindowMode,
@@ -46,8 +49,7 @@ fn main() {
             .build()
             .unwrap();
     // SET WINDOW POSITION
-    // FIXME
-    graphics::set_window_position(&ctx, LogicalPosition::new(1000.0, 20.0)).unwrap();
+    //graphics::set_window_position(&ctx, LogicalPosition::new(1000.0, 20.0)).unwrap();     // FIXME
     // SET WINDOW TITLE
     let app_version = env!("CARGO_PKG_VERSION");
     let window_title = format!("{} {}", WINDOW_TITLE, app_version);
