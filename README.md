@@ -9,7 +9,5 @@ And it's made in an attempt to learn Rust programming language.
 
 Game framework used is [ggez](https://ggez.rs/).
 
-[Version history](version-history.md).
-
 ## Disclaimer
 The game is fully functional and without any known bugs that prevent gameplay, but it's not completely finished yet: there are various [improvements and refactorings](https://github.com/rdrmic/color-columns/issues) to be done.
