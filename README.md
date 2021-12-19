@@ -5,7 +5,7 @@ A falling-blocks-type 2D game with a simple but addictive gameplay
 
 ## About
 The game is a remake of various old, 'classic', columns-like games.
-And it's made in an attempt to learn Rust programming language.
+And it's made in an attempt to learn [Rust programming language](https://www.rust-lang.org/).
 
 Game-dev framework used is [ggez](https://ggez.rs/).
 
