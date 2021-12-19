@@ -1,7 +1,8 @@
-VERSION     DATE            SIZE-CODE       SIZE-DIST       
+VERSION     DATE                SIZE-CODE       SIZE-EXE        SIZE-DIST       
 --------------------------------------------------------------------------------
-0.1.0       25.11.2021      88,0 KB         3,31 MB
-    - Fully functional game.
-0.1.1    19.12.2021    88,0 KB      3,31 MB
-    - Rust 1.56.0 > 1.57.0.
-    - Running without console window (#17).
+0.1.0       25.11.2021          88,0 KB         3,31 MB         4,13 MB
+    - Fully functional game
+0.1.1       19.12.2021          88,1 KB         3,30 MB         4,12 MB
+    - Rust version update: 1.56.0 > 1.57.0
+    - Running .exe without spawning a console window
+    - Window positioning (temporary) disabled
