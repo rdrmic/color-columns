@@ -1,6 +1,6 @@
 [package]
 name = "color_columns"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Rade Drmić <rdrmic@gmail.com>"]
 edition = "2021"
 
@@ -8,5 +8,5 @@ edition = "2021"
 ggez = "0.7.0"
 #winit = "0.25.0"
 rand = "0.8.4"
-glam = "0.20.1"
+glam = "0.20.2"
 dirs = "4.0.0"
