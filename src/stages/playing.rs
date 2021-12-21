@@ -126,9 +126,9 @@ impl Playing {
 
             println!("*** REPLAYING FROM SNAPSHOT ***");
             println!("=> PlayingState::HandlingMatches");
-        } else {
-            //println!("=> PlayingState::Ready");
-        }
+        } /* else {
+              println!("=> PlayingState::Ready");
+          }*/
 
         Playing {
             hud: Hud::new(resources),
@@ -151,6 +151,7 @@ impl Playing {
 
     // TODO refactor
     fn new_game(&mut self) {
+        //println!("Playing.new_game()");
         let highscore = Scoring::load_highscore();
 
         self.scoring = Scoring::new(highscore);
@@ -192,6 +193,7 @@ impl Playing {
     }
 
     fn game_over(&mut self) {
+        //println!("Playing.game_over()");
         self.scoring.save_highscore();
         self.hud.update_game_info(GameInfoType::GameOver);
         self.playing_state = Some(PlayingState::GameOver);
@@ -241,11 +243,12 @@ impl Playing {
     }
 
     fn quit_to_main_menu(&mut self) {
+        //println!("Playing.quit_to_main_menu()");
         // FIXME refactor
         self.playing_state = Some(PlayingState::QuittingToMainMenu);
         self.descending_cargo = None;
         self.pile = Pile::new();
-        //Some(Stage::MainMenu)
+        self.paused_blocks = None;
     }
 }
 
@@ -412,6 +415,7 @@ impl StageTrait for Playing {
                 }
             }
             Some(PlayingState::Pause) => {
+                //println!("// PlayingState::Pause");
                 self.num_frames_pause += 1;
                 if self.num_frames_pause % NUM_TICKS_FOR_PAUSED_BLOCKS_SHUFFLE == 0 {
                     self.shuffle_block_colors();
@@ -433,12 +437,11 @@ impl StageTrait for Playing {
                 }
             }
             Some(PlayingState::GameOver) => {
+                //println!("// PlayingState::GameOver");
                 match input_event {
                     InputEvent::Enter => {
-                        // TODO reinitialize game
-                        self.playing_state = Some(PlayingState::Ready);
-                        //println!("PlayingState::Ready =>");
-
+                        //println!("PlayingState::None =>");
+                        self.playing_state = None;
                         self.hud.update_game_info(GameInfoType::None);
                     }
                     InputEvent::Escape => {
@@ -450,6 +453,7 @@ impl StageTrait for Playing {
                 }
             }
             Some(PlayingState::QuittingToMainMenu) => {
+                //println!("// PlayingState::QuittingToMainMenu");
                 self.playing_state = None;
                 return Some(Stage::MainMenu);
             }
