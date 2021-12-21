@@ -11,3 +11,5 @@ VERSION     DATE                SIZE-CODE       SIZE-EXE        SIZE-DIST
 0.1.3       21.12.2021          90,4 KB         3,30 MB         4,12 MB
     - BUGFIX: Glitch on starting new game when entering from main menu // #6
     - BUGFIX: Newest higscore is not shown when reinitializing gameplay from main menu  // #15
+0.1.4       21.12.2021          92,9 KB         3,30 MB         4,12 MB
+    - Game info and navigation instructions on gameplay start // #7
