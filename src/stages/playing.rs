@@ -157,7 +157,7 @@ impl Playing {
         self.scoring = Scoring::new(highscore);
 
         self.hud.new_game(highscore);
-        self.hud.update_game_info(GameInfoType::Ready);
+        self.hud.set_game_info(GameInfoType::Ready);
 
         self.playing_state = Some(PlayingState::Ready);
         self.num_frames = 0;
@@ -186,7 +186,7 @@ impl Playing {
     fn pause(&mut self) {
         self.paused_blocks = Some(self.get_all_visible_blocks());
         self.shuffle_block_colors();
-        self.hud.update_game_info(GameInfoType::Pause);
+        self.hud.set_game_info(GameInfoType::Pause);
         self.playing_state_when_paused = Some(self.playing_state);
         self.playing_state = Some(PlayingState::Pause);
         self.num_frames_pause = 0;
@@ -195,7 +195,7 @@ impl Playing {
     fn game_over(&mut self) {
         //println!("Playing.game_over()");
         self.scoring.save_highscore();
-        self.hud.update_game_info(GameInfoType::GameOver);
+        self.hud.set_game_info(GameInfoType::GameOver);
         self.playing_state = Some(PlayingState::GameOver);
     }
 
@@ -249,6 +249,7 @@ impl Playing {
         self.descending_cargo = None;
         self.pile = Pile::new();
         self.paused_blocks = None;
+        self.matching = None;
     }
 }
 
@@ -262,7 +263,7 @@ impl StageTrait for Playing {
             None => self.new_game(),
             Some(PlayingState::Ready) => {
                 if self.hud.game_info.is_none() {
-                    self.hud.update_game_info(GameInfoType::Ready);
+                    self.hud.set_game_info(GameInfoType::Ready);
                 }
 
                 if self.next_cargo.is_none() {
@@ -271,10 +272,9 @@ impl StageTrait for Playing {
 
                 match input_event {
                     InputEvent::Enter => {
+                        self.hud.set_game_info(GameInfoType::Go);
                         self.playing_state = Some(PlayingState::DescendingCargo);
                         //println!("PlayingState::DescendingCargo =>");
-
-                        self.hud.update_game_info(GameInfoType::None);
                     }
                     InputEvent::Escape => {
                         //println!("### Stage::Playing / Ready -> Stage::MainMenu");
@@ -422,11 +422,10 @@ impl StageTrait for Playing {
                 }
                 match input_event {
                     InputEvent::Enter => {
+                        self.hud.set_game_info(GameInfoType::None);
                         self.playing_state = self.playing_state_when_paused.unwrap();
                         self.playing_state_when_paused = None;
-                        //println!("PlayingState::DescendingCargo =>");
                         self.paused_blocks = None;
-                        self.hud.update_game_info(GameInfoType::None);
                     }
                     InputEvent::Escape => {
                         //println!("### Stage::Playing / Pause -> Stage::MainMenu");
@@ -442,7 +441,7 @@ impl StageTrait for Playing {
                     InputEvent::Enter => {
                         //println!("PlayingState::None =>");
                         self.playing_state = None;
-                        self.hud.update_game_info(GameInfoType::None);
+                        self.hud.set_game_info(GameInfoType::None);
                     }
                     InputEvent::Escape => {
                         //println!("### Stage::Playing / GameOver -> Stage::MainMenu");
@@ -456,6 +455,13 @@ impl StageTrait for Playing {
                 //println!("// PlayingState::QuittingToMainMenu");
                 self.playing_state = None;
                 return Some(Stage::MainMenu);
+            }
+        }
+        if self.hud.game_info.is_some() {
+            if let Some(PlayingState::DescendingCargo) | Some(PlayingState::HandlingMatches) =
+                self.playing_state
+            {
+                self.hud.update_game_info();
             }
         }
         Some(Stage::Playing)
