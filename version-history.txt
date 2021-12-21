@@ -5,6 +5,9 @@ VERSION     DATE                SIZE-CODE       SIZE-EXE        SIZE-DIST
 0.1.1       19.12.2021          88,1 KB         3,30 MB         4,12 MB
     - Rust version update: 1.56.0 > 1.57.0
     - Running .exe without spawning a console window // #17 
-    - Window positioning (temporary) disabled
+    - Window positioning (temporary) disabled (#5)
 0.1.2       20.12.2021          90,1 KB         3,30 MB         4,12 MB
     - Improved "How to play" and "Credits" screens // #3
+0.1.3       21.12.2021          90,4 KB         3,30 MB         4,12 MB
+    - BUGFIX: Glitch on starting new game when entering from main menu // #6
+    - BUGFIX: Newest higscore is not shown when reinitializing gameplay from main menu  // #15
