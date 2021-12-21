@@ -73,7 +73,7 @@ impl Scoring {
         }
         self.maxcombo_accumulator += combo;
         self.is_new_maxcombo = false;
-        if combo > self.maxcombo {
+        if self.maxcombo_accumulator > self.maxcombo {
             self.maxcombo = self.maxcombo_accumulator;
             self.is_new_maxcombo = true;
         }
