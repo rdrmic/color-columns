@@ -8,6 +8,7 @@ use crate::config::{COLOR_GRAY, NAVIGATION_INSTRUCTIONS_CHAR_SCALE};
 #[derive(Clone)]
 pub struct NavigationInstructions {
     playing_ready: Text,
+    playing_go: Text,
     playing_pause: Text,
     playing_gameover: Text,
 
@@ -20,6 +21,7 @@ impl NavigationInstructions {
         NavigationInstructions {
             // PLAYING
             playing_ready: label_factory.create_label("'Enter' to start\n'Esc' to main menu"),
+            playing_go: label_factory.create_label("Press 'Esc' to pause"),
             playing_pause: label_factory
                 .create_label("'Enter' to continue\n'Esc' to exit to main menu"),
             playing_gameover: label_factory
@@ -31,6 +33,10 @@ impl NavigationInstructions {
 
     pub fn get_playing_ready(&self) -> &Text {
         &self.playing_ready
+    }
+
+    pub fn get_playing_go(&self) -> &Text {
+        &self.playing_go
     }
 
     pub fn get_playing_pause(&self) -> &Text {
