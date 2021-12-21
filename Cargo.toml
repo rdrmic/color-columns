@@ -1,6 +1,6 @@
 [package]
 name = "color_columns"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Rade Drmić <rdrmic@gmail.com>"]
 edition = "2021"
 
