@@ -26,7 +26,7 @@ impl Credits {
 
         let text_str = "\n\
             This game is a remake of\n\
-            various old, 'classic',\n\
+            various old, \"classic\",\n\
             columns-like games.\n\
             And it's made in an attempt\n\
             to learn Rust programming\n\
