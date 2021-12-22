@@ -12,7 +12,8 @@ use crate::blocks::matches::Matching;
 use crate::blocks::pile::Pile;
 use crate::blocks::{Block, BlocksFactory};
 use crate::config::{
-    COLOR_GRAY, GAME_ARENA_RECT, NUM_TICKS_FOR_CARGO_DESCENT, NUM_TICKS_FOR_PAUSED_BLOCKS_SHUFFLE,
+    COLOR_GRAY, GAME_ARENA_RECT, NUM_DESCENDED_CARGOES_SPEEDUP,
+    NUM_TICKS_FOR_PAUSED_BLOCKS_SHUFFLE, STARTING_NUM_TICKS_FOR_CARGO_DESCENT,
 };
 use crate::input::InputEvent;
 use crate::resources::Resources;
@@ -85,8 +86,10 @@ pub struct Playing {
     blocks_factory: BlocksFactory,
     next_cargo: Option<Cargo>,
     descending_cargo: Option<Cargo>,
+    num_ticks_for_cargo_descent: usize,
     is_cargo_at_bottom: bool,
     is_descending_over: bool,
+    num_descended_cargoes: usize,
     pile: Pile,
     matching: Option<Matching>,
     scoring: Scoring,
@@ -138,8 +141,10 @@ impl Playing {
             blocks_factory,
             next_cargo,
             descending_cargo: None,
+            num_ticks_for_cargo_descent: STARTING_NUM_TICKS_FOR_CARGO_DESCENT,
             is_cargo_at_bottom: false,
             is_descending_over: false,
+            num_descended_cargoes: 0,
             pile,
             matching,                 // FIXME matching: None,
             scoring: Scoring::new(0), // FIXME refactor
@@ -164,8 +169,10 @@ impl Playing {
 
         self.next_cargo = Some(self.blocks_factory.create_next_cargo());
         self.descending_cargo = None;
+        self.num_ticks_for_cargo_descent = STARTING_NUM_TICKS_FOR_CARGO_DESCENT;
         self.is_cargo_at_bottom = false;
         self.is_descending_over = false;
+        self.num_descended_cargoes = 0;
 
         self.pile = Pile::new();
         self.matching = None;
@@ -301,7 +308,7 @@ impl StageTrait for Playing {
                     self.is_descending_over = false;
                 }
 
-                if self.num_frames % NUM_TICKS_FOR_CARGO_DESCENT == 0
+                if self.num_frames % self.num_ticks_for_cargo_descent == 0
                     && self.descending_cargo.is_none()
                 {
                     self.begin_next_cargo_descent();
@@ -310,7 +317,8 @@ impl StageTrait for Playing {
 
                 if let Some(descending_cargo) = self.descending_cargo.as_mut() {
                     self.is_cargo_at_bottom = descending_cargo.is_at_bottom(&self.pile);
-                    if self.num_frames % NUM_TICKS_FOR_CARGO_DESCENT == 0 && self.is_cargo_at_bottom
+                    if self.num_frames % self.num_ticks_for_cargo_descent == 0
+                        && self.is_cargo_at_bottom
                     {
                         self.is_descending_over = true;
                     }
@@ -329,7 +337,7 @@ impl StageTrait for Playing {
                         }
                     }
 
-                    if self.num_frames % NUM_TICKS_FOR_CARGO_DESCENT == 0
+                    if self.num_frames % self.num_ticks_for_cargo_descent == 0
                         && (!self.is_descending_over || self.is_cargo_at_bottom)
                     {
                         self.is_cargo_at_bottom = descending_cargo.descend_one_step(&self.pile);
@@ -339,6 +347,12 @@ impl StageTrait for Playing {
                         let num_of_remaining_places_in_column = self
                             .pile
                             .take_cargo(mem::take(&mut self.descending_cargo).unwrap());
+
+                        self.num_descended_cargoes += 1;
+                        if self.num_descended_cargoes % NUM_DESCENDED_CARGOES_SPEEDUP == 0 {
+                            self.num_ticks_for_cargo_descent -= 1;
+                        }
+
                         if num_of_remaining_places_in_column < 0 {
                             self.game_over();
                             //println!("PlayingState::GameOver =>");
