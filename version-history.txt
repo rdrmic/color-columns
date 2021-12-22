@@ -13,5 +13,6 @@ VERSION     DATE                SIZE-CODE       SIZE-EXE        SIZE-DIST
     - BUGFIX: Newest higscore is not shown when reinitializing gameplay from main menu  // #15
 0.1.4       21.12.2021          92,9 KB         3,30 MB         4,12 MB
     - Game info and navigation instructions on gameplay start // #7
-0.1.5       21.12.2021          92,9 KB         3,30 MB         4,12 MB
+0.1.5       21.12.2021          93,5 KB         3,31 MB         4,13 MB
     - BUGFIX: Max combo calculation on sequential matchings // #16
+    - Accelerating gameplay gradually // #12
