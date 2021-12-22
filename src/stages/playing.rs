@@ -12,8 +12,9 @@ use crate::blocks::matches::Matching;
 use crate::blocks::pile::Pile;
 use crate::blocks::{Block, BlocksFactory};
 use crate::config::{
-    COLOR_GRAY, GAME_ARENA_RECT, NUM_DESCENDED_CARGOES_SPEEDUP,
-    NUM_TICKS_FOR_PAUSED_BLOCKS_SHUFFLE, STARTING_NUM_TICKS_FOR_CARGO_DESCENT,
+    COLOR_GRAY, GAME_ARENA_RECT, NUM_DESCENDED_CARGOES_GAMEPLAY_ACCELERATION,
+    NUM_TICKS_FOR_PAUSED_BLOCKS_SHUFFLE, NUM_TICKS_GAMEPLAY_ACCELERATION_LIMIT,
+    STARTING_NUM_TICKS_FOR_CARGO_DESCENT,
 };
 use crate::input::InputEvent;
 use crate::resources::Resources;
@@ -348,9 +349,15 @@ impl StageTrait for Playing {
                             .pile
                             .take_cargo(mem::take(&mut self.descending_cargo).unwrap());
 
-                        self.num_descended_cargoes += 1;
-                        if self.num_descended_cargoes % NUM_DESCENDED_CARGOES_SPEEDUP == 0 {
-                            self.num_ticks_for_cargo_descent -= 1;
+                        if self.num_ticks_for_cargo_descent > NUM_TICKS_GAMEPLAY_ACCELERATION_LIMIT
+                        {
+                            self.num_descended_cargoes += 1;
+                            if self.num_descended_cargoes
+                                % NUM_DESCENDED_CARGOES_GAMEPLAY_ACCELERATION
+                                == 0
+                            {
+                                self.num_ticks_for_cargo_descent -= 1;
+                            }
                         }
 
                         if num_of_remaining_places_in_column < 0 {
