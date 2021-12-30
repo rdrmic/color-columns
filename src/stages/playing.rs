@@ -3,7 +3,7 @@ use std::{env, mem};
 use ggez::graphics::{self, Color, DrawMode, DrawParam, Mesh, Rect, StrokeOptions};
 use ggez::Context;
 
-use self::hud::GameInfoType;
+use self::hud::{GameInfo, GameInfoType};
 use self::scoring::Scoring;
 
 use super::{Stage, StageTrait};
@@ -96,6 +96,7 @@ pub struct Playing {
     scoring: Scoring,
     paused_blocks: Option<Vec<Block>>,
     playing_state_when_paused: Option<Option<PlayingState>>,
+    game_info_when_paused: Option<GameInfo>,
     num_frames_pause: usize,
 }
 
@@ -151,6 +152,7 @@ impl Playing {
             scoring: Scoring::new(0), // FIXME refactor
             paused_blocks: None,
             playing_state_when_paused: None,
+            game_info_when_paused: None,
             num_frames_pause: 0,
         }
     }
@@ -180,6 +182,7 @@ impl Playing {
 
         self.paused_blocks = None;
         self.playing_state_when_paused = None;
+        self.game_info_when_paused = None;
         self.num_frames_pause = 0;
     }
 
@@ -189,14 +192,29 @@ impl Playing {
                 .put_cargo_in_arena(mem::take(&mut self.next_cargo).unwrap()),
         );
         self.next_cargo = Some(self.blocks_factory.create_next_cargo());
+
+        if self.num_ticks_for_cargo_descent > NUM_TICKS_GAMEPLAY_ACCELERATION_LIMIT
+            && self.num_descended_cargoes > 0
+            && self.num_descended_cargoes % NUM_DESCENDED_CARGOES_GAMEPLAY_ACCELERATION == 0
+        {
+            self.num_ticks_for_cargo_descent -= 1;
+            if self.num_ticks_for_cargo_descent == NUM_TICKS_GAMEPLAY_ACCELERATION_LIMIT {
+                self.hud.maxspeed_reached = true;
+            }
+            self.hud.set_game_info(GameInfoType::Speedup);
+        }
     }
 
     fn pause(&mut self) {
         self.paused_blocks = Some(self.get_all_visible_blocks());
         self.shuffle_block_colors();
-        self.hud.set_game_info(GameInfoType::Pause);
+
         self.playing_state_when_paused = Some(self.playing_state);
         self.playing_state = Some(PlayingState::Pause);
+
+        self.game_info_when_paused = self.hud.game_info.clone();
+        self.hud.set_game_info(GameInfoType::Pause);
+
         self.num_frames_pause = 0;
     }
 
@@ -345,20 +363,11 @@ impl StageTrait for Playing {
                     }
 
                     if self.is_descending_over {
+                        self.num_descended_cargoes += 1;
+
                         let num_of_remaining_places_in_column = self
                             .pile
                             .take_cargo(mem::take(&mut self.descending_cargo).unwrap());
-
-                        if self.num_ticks_for_cargo_descent > NUM_TICKS_GAMEPLAY_ACCELERATION_LIMIT
-                        {
-                            self.num_descended_cargoes += 1;
-                            if self.num_descended_cargoes
-                                % NUM_DESCENDED_CARGOES_GAMEPLAY_ACCELERATION
-                                == 0
-                            {
-                                self.num_ticks_for_cargo_descent -= 1;
-                            }
-                        }
 
                         if num_of_remaining_places_in_column < 0 {
                             self.game_over();
@@ -443,10 +452,13 @@ impl StageTrait for Playing {
                 }
                 match input_event {
                     InputEvent::Enter => {
-                        self.hud.set_game_info(GameInfoType::None);
+                        self.paused_blocks = None;
+
                         self.playing_state = self.playing_state_when_paused.unwrap();
                         self.playing_state_when_paused = None;
-                        self.paused_blocks = None;
+
+                        self.hud.game_info = self.game_info_when_paused.clone();
+                        self.game_info_when_paused = None;
                     }
                     InputEvent::Escape => {
                         //println!("### Stage::Playing / Pause -> Stage::MainMenu");
@@ -478,12 +490,10 @@ impl StageTrait for Playing {
                 return Some(Stage::MainMenu);
             }
         }
-        if self.hud.game_info.is_some() {
-            if let Some(PlayingState::DescendingCargo) | Some(PlayingState::HandlingMatches) =
-                self.playing_state
-            {
-                self.hud.update_game_info();
-            }
+        if let Some(PlayingState::DescendingCargo) | Some(PlayingState::HandlingMatches) =
+            self.playing_state
+        {
+            self.hud.update_game_info();
         }
         Some(Stage::Playing)
     }
