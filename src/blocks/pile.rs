@@ -69,7 +69,7 @@ impl Pile {
 
     fn collect_vertical_matches(&self, matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>) {
         let mut sequence = Vec::with_capacity(GAME_ARENA_ROWS);
-        let mut matches_collector = Vec::<(char, usize, usize)>::with_capacity(5);
+        let mut match_collector = Vec::<(char, usize, usize)>::with_capacity(5);
 
         for col_idx in 0..GAME_ARENA_COLUMNS {
             let column_top_idx = self.column_tops[col_idx].0;
@@ -81,7 +81,7 @@ impl Pile {
                 Self::search_sequence_for_vertical_matches(
                     Direction::Vertical,
                     &sequence,
-                    &mut matches_collector,
+                    &mut match_collector,
                     matches,
                 );
                 sequence.clear();
@@ -94,7 +94,7 @@ impl Pile {
         matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
     ) {
         let mut sequence = Vec::with_capacity(GAME_ARENA_COLUMNS);
-        let mut matches_collector = Vec::<(char, usize, usize)>::with_capacity(5);
+        let mut match_collector = Vec::<(char, usize, usize)>::with_capacity(5);
 
         let topmost_column_idx = self.get_topmost_column_idx();
         if topmost_column_idx > -1 {
@@ -106,7 +106,7 @@ impl Pile {
                 Self::search_sequence_for_matches(
                     Direction::Horizontal,
                     &sequence,
-                    &mut matches_collector,
+                    &mut match_collector,
                     matches,
                 );
                 sequence.clear();
@@ -119,7 +119,7 @@ impl Pile {
         matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
     ) {
         let mut sequence = Vec::with_capacity(max(GAME_ARENA_COLUMNS, GAME_ARENA_ROWS));
-        let mut matches_collector = Vec::<(char, usize, usize)>::with_capacity(5);
+        let mut match_collector = Vec::<(char, usize, usize)>::with_capacity(5);
 
         let col_idx_start: usize = 0;
         for row_idx_start in (0..GAME_ARENA_ROWS - 2).rev() {
@@ -134,7 +134,7 @@ impl Pile {
             Self::search_sequence_for_matches(
                 Direction::DiagonalSlash,
                 &sequence,
-                &mut matches_collector,
+                &mut match_collector,
                 matches,
             );
             sequence.clear();
@@ -152,7 +152,7 @@ impl Pile {
             Self::search_sequence_for_matches(
                 Direction::DiagonalSlash,
                 &sequence,
-                &mut matches_collector,
+                &mut match_collector,
                 matches,
             );
             sequence.clear();
@@ -164,7 +164,7 @@ impl Pile {
         matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
     ) {
         let mut sequence = Vec::with_capacity(max(GAME_ARENA_COLUMNS, GAME_ARENA_ROWS));
-        let mut matches_collector = Vec::<(char, usize, usize)>::with_capacity(5);
+        let mut match_collector = Vec::<(char, usize, usize)>::with_capacity(5);
 
         let row_idx_start: usize = 0;
         for col_idx_start in 2..GAME_ARENA_COLUMNS as isize {
@@ -179,7 +179,7 @@ impl Pile {
             Self::search_sequence_for_matches(
                 Direction::DiagonalBackslash,
                 &sequence,
-                &mut matches_collector,
+                &mut match_collector,
                 matches,
             );
             sequence.clear();
@@ -197,7 +197,7 @@ impl Pile {
             Self::search_sequence_for_matches(
                 Direction::DiagonalBackslash,
                 &sequence,
-                &mut matches_collector,
+                &mut match_collector,
                 matches,
             );
             sequence.clear();
@@ -220,12 +220,12 @@ impl Pile {
         for block_repr in sequence {
             if let Some(previous_match) = collector.last() {
                 if block_repr.0 != previous_match.0 {
-                    Self::take_matches_from_collector(direction, collector, matches);
+                    Self::take_match_from_collector(direction, collector, matches);
                 }
             }
             collector.push(*block_repr);
         }
-        Self::take_matches_from_collector(direction, collector, matches);
+        Self::take_match_from_collector(direction, collector, matches);
     }
 
     fn search_sequence_for_matches(
@@ -234,33 +234,33 @@ impl Pile {
         collector: &mut Vec<(char, usize, usize)>,
         matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
     ) {
-        for block_opt in sequence {
-            if block_opt.0 == NO_BLOCK_CODE {
-                Self::take_matches_from_collector(direction, collector, matches);
+        for block_repr in sequence {
+            if block_repr.0 == NO_BLOCK_CODE {
+                Self::take_match_from_collector(direction, collector, matches);
             } else {
-                if let Some(previous_match) = collector.last() {
-                    if block_opt.0 != previous_match.0 {
-                        Self::take_matches_from_collector(direction, collector, matches);
+                if let Some(previous_block_repr) = collector.last() {
+                    if block_repr.0 != previous_block_repr.0 {
+                        Self::take_match_from_collector(direction, collector, matches);
                     }
                 }
-                collector.push(*block_opt);
+                collector.push(*block_repr);
             }
         }
-        Self::take_matches_from_collector(direction, collector, matches);
+        Self::take_match_from_collector(direction, collector, matches);
     }
 
-    fn take_matches_from_collector(
+    fn take_match_from_collector(
         direction: Direction,
         collector: &mut Vec<(char, usize, usize)>,
         matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
     ) {
         if collector.len() >= 3 {
             let vec_of_matches = matches.entry(direction).or_insert_with(Vec::new);
-            let matches = collector
+            let r#match = collector
                 .iter()
-                .map(|m| (m.1, m.2))
+                .map(|block_repr| (block_repr.1, block_repr.2))
                 .collect::<Vec<(usize, usize)>>();
-            vec_of_matches.push(matches);
+            vec_of_matches.push(r#match);
         }
         collector.clear();
     }
