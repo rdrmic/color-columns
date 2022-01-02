@@ -9,7 +9,7 @@ use crate::{
         COLOR_LIGHT_GRAY, CREDITS_CHAR_SCALE, CREDITS_TEXT_POSITION, GO_BACK_LABEL_POSITION,
         HOWTOPLAY_AND_CREDITS_AREA_WIDTH,
     },
-    input::InputEvent,
+    input::Event,
     resources::Resources,
 };
 
@@ -49,15 +49,15 @@ impl Credits {
             go_back_instruction: resources
                 .get_navigation_instructions()
                 .get_go_back()
-                .to_owned(),
+                .clone(),
             text,
         }
     }
 }
 
 impl StageTrait for Credits {
-    fn update(&mut self, input_event: InputEvent) -> Option<Stage> {
-        if let InputEvent::Escape = input_event {
+    fn update(&mut self, input_event: Event) -> Option<Stage> {
+        if let Event::Escape = input_event {
             //println!("### Stage::Credits -> Stage::MainMenu");
             return Some(Stage::MainMenu);
         }

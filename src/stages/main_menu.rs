@@ -13,7 +13,7 @@ use crate::config::{
     MAIN_MENU_SELECTED_ITEM_BLOCK_MARGIN_X, MAIN_MENU_SELECTED_ITEM_BLOCK_MARGIN_Y,
     MAIN_MENU_SELECTED_ITEM_BLOCK_SIZE,
 };
-use crate::input::InputEvent;
+use crate::input::Event;
 use crate::resources::Resources;
 use crate::stages::Stage;
 
@@ -109,10 +109,6 @@ impl SelectedItemIndicator {
         let blocks_positions;
         let color;
         match selected_item {
-            Stage::Playing => {
-                blocks_positions = self.blocks_positions.play;
-                color = BLOCK_COLOR_GREEN;
-            }
             Stage::HowToPlay => {
                 blocks_positions = self.blocks_positions.how_to_play;
                 color = BLOCK_COLOR_YELLOW;
@@ -122,10 +118,11 @@ impl SelectedItemIndicator {
                 color = BLOCK_COLOR_BLUE;
             }
             _ => {
+                // Stage::Playing
                 blocks_positions = self.blocks_positions.play;
                 color = BLOCK_COLOR_GREEN;
             }
-        }
+        };
 
         let left_block = Block::new(
             blocks_positions[0],
@@ -189,27 +186,27 @@ impl MainMenu {
 }
 
 impl StageTrait for MainMenu {
-    fn update(&mut self, input_event: InputEvent) -> Option<Stage> {
+    fn update(&mut self, input_event: Event) -> Option<Stage> {
         let previous_selected_item_idx = self.selected_item_idx;
         match input_event {
-            InputEvent::Down => {
+            Event::Down => {
                 self.selected_item_idx += 1;
                 if self.selected_item_idx > 2 {
                     self.selected_item_idx = 0;
                 }
             }
-            InputEvent::Up => {
+            Event::Up => {
                 if self.selected_item_idx == 0 {
                     self.selected_item_idx = 3;
                 }
                 self.selected_item_idx -= 1;
             }
-            InputEvent::Enter => {
+            Event::Enter => {
                 let selected_stage = Self::ITEMS[self.selected_item_idx];
                 //println!("### Stage::MainMenu -> Stage::{:?}", selected_stage);
                 return Some(selected_stage);
             }
-            InputEvent::Escape => {
+            Event::Escape => {
                 //println!("### Stage::MainMenu -> QUIT");
                 return None;
             }

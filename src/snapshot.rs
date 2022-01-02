@@ -1,9 +1,11 @@
+#![allow(clippy::cast_possible_wrap)]
+
 use std::fs;
 
 use ggez::mint::Point2;
 
 use crate::blocks::pile::Pile;
-use crate::blocks::{idx_to_position, Block, BlocksFactory};
+use crate::blocks::{idx_to_position, Block, Factory};
 use crate::config::{
     BLOCK_SIZE, GAME_ARENA_COLUMNS, GAME_ARENA_RECT, GAME_ARENA_ROWS, NO_BLOCK_CODE,
 };
@@ -36,7 +38,7 @@ pub fn create_pile_from_file() -> Pile {
                     x: idx_to_position(col_idx, 'x'),
                     y: idx_to_position(row_idx, 'y'),
                 };
-                let color = BlocksFactory::COLORS
+                let color = Factory::COLORS
                     .into_iter()
                     .find(|color| color.code == *snapshot_block_code)
                     .expect("Snapshot's colors don't match those in app!");
@@ -56,5 +58,5 @@ pub fn create_pile_from_file() -> Pile {
         }
     }
 
-    Pile::from_snapshot(matrix, column_tops)
+    Pile::from_snapshot(&matrix, column_tops)
 }

@@ -1,3 +1,5 @@
+#![allow(clippy::cast_precision_loss)]
+
 use ggez::graphics::{Color, Rect};
 
 use crate::blocks::BlockColor;

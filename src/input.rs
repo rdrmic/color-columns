@@ -1,7 +1,7 @@
 use ggez::event::KeyCode;
 
 #[derive(Debug)]
-pub enum InputEvent {
+pub enum Event {
     None,
     Enter,
     Escape,
@@ -13,30 +13,22 @@ pub enum InputEvent {
     Drop,
 }
 
-impl Default for InputEvent {
+impl Default for Event {
     fn default() -> Self {
-        InputEvent::None
+        Event::None
     }
 }
 
-impl InputEvent {
+impl Event {
     pub fn map_input(keycode: KeyCode) -> Self {
         match keycode {
-            // cursor keys
-            KeyCode::Right => Self::Right,
-            KeyCode::Left => Self::Left,
-            KeyCode::Up => Self::Up,
-            KeyCode::Down => Self::Down,
-            // "wasd" keys
-            KeyCode::D => Self::Right,
-            KeyCode::A => Self::Left,
-            KeyCode::W => Self::Up,
-            KeyCode::S => Self::Down,
-            // other keys
+            KeyCode::Right | KeyCode::D => Self::Right,
+            KeyCode::Left | KeyCode::A => Self::Left,
+            KeyCode::Up | KeyCode::W => Self::Up,
+            KeyCode::Down | KeyCode::S => Self::Down,
             KeyCode::Space => Self::Drop,
             KeyCode::Return => Self::Enter,
             KeyCode::Escape => Self::Escape,
-            // default: None
             _ => Self::default(),
         }
     }

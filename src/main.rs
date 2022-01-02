@@ -1,4 +1,4 @@
-//#![warn(clippy::all, clippy::pedantic)]
+#![warn(clippy::all, clippy::pedantic)]
 #![windows_subsystem = "windows"]
 
 use std::{env, mem, path::PathBuf};
@@ -15,7 +15,7 @@ use ggez::{
 use config::{FPS, WINDOW_HEIGHT, WINDOW_TITLE, WINDOW_WIDTH};
 
 use crate::{
-    input::InputEvent,
+    input::Event,
     resources::Resources,
     stages::{
         credits::Credits, how_to_play::HowToPlay, main_menu::MainMenu, playing::Playing, Stage,
@@ -66,7 +66,7 @@ fn main() {
 struct AppState {
     stages: Vec<Box<dyn StageTrait>>,
     current_stage: Stage,
-    input_event: InputEvent, // FIXME multiple events
+    input_event: Event, // FIXME multiple events
 }
 
 impl AppState {
@@ -80,7 +80,7 @@ impl AppState {
                 Box::new(Credits::new(&resources)),
             ],
             current_stage: initial_stage,
-            input_event: InputEvent::None,
+            input_event: Event::None,
         }
     }
 
@@ -138,7 +138,7 @@ impl EventHandler<GameError> for AppState {
             _keymods,
             _repeat
         );*/
-        self.input_event = InputEvent::map_input(keycode);
+        self.input_event = Event::map_input(keycode);
 
         // FIXME remove
         /*if keycode == KeyCode::Escape {
@@ -148,7 +148,7 @@ impl EventHandler<GameError> for AppState {
 
     fn focus_event(&mut self, _ctx: &mut Context, gained: bool) {
         if !gained {
-            self.input_event = InputEvent::LostFocus;
+            self.input_event = Event::LostFocus;
         }
     }
 

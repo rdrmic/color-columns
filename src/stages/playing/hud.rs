@@ -80,12 +80,10 @@ impl HudLabels {
                 COLOR_RED,
             ),
             // INSTRUCTIONS
-            game_info_instructions_ready: navigation_instructions.get_playing_ready().to_owned(),
-            game_info_instructions_go: navigation_instructions.get_playing_go().to_owned(),
-            game_info_instructions_pause: navigation_instructions.get_playing_pause().to_owned(),
-            game_info_instructions_gameover: navigation_instructions
-                .get_playing_gameover()
-                .to_owned(),
+            game_info_instructions_ready: navigation_instructions.get_playing_ready().clone(),
+            game_info_instructions_go: navigation_instructions.get_playing_go().clone(),
+            game_info_instructions_pause: navigation_instructions.get_playing_pause().clone(),
+            game_info_instructions_gameover: navigation_instructions.get_playing_gameover().clone(),
             // SCORING
             scoring_score: Self::create_scoring_label(font_semi_bold, "SCORE", COLOR_GREEN),
             scoring_maxcombo: Self::create_scoring_label(font_semi_bold, "MAX COMBO", COLOR_BLUE),

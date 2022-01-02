@@ -16,7 +16,7 @@ pub struct NavigationInstructions {
 }
 
 impl NavigationInstructions {
-    pub fn new(font: &Font) -> Self {
+    pub fn new(font: Font) -> Self {
         let label_factory = NavigationInstructionsFactory::new(font);
         NavigationInstructions {
             // PLAYING
@@ -62,10 +62,10 @@ struct NavigationInstructionsFactory {
 }
 
 impl NavigationInstructionsFactory {
-    pub fn new(font: &Font) -> Self {
+    pub fn new(font: Font) -> Self {
         NavigationInstructionsFactory {
             color: Some(COLOR_GRAY),
-            font: Some(*font),
+            font: Some(font),
             scale: Some(PxScale::from(NAVIGATION_INSTRUCTIONS_CHAR_SCALE)),
         }
     }

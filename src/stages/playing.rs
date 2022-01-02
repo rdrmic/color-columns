@@ -10,13 +10,13 @@ use super::{Stage, StageTrait};
 use crate::blocks::cargo::Cargo;
 use crate::blocks::matches::Matching;
 use crate::blocks::pile::Pile;
-use crate::blocks::{Block, BlocksFactory};
+use crate::blocks::{Block, Factory};
 use crate::config::{
     COLOR_GRAY, GAME_ARENA_RECT, NUM_DESCENDED_CARGOES_GAMEPLAY_ACCELERATION,
     NUM_TICKS_FOR_PAUSED_BLOCKS_SHUFFLE, NUM_TICKS_GAMEPLAY_ACCELERATION_LIMIT,
     STARTING_NUM_TICKS_FOR_CARGO_DESCENT,
 };
-use crate::input::InputEvent;
+use crate::input::Event;
 use crate::resources::Resources;
 use crate::snapshot;
 use crate::stages::playing::hud::Hud;
@@ -84,7 +84,7 @@ pub struct Playing {
     game_arena: GameArena,
     playing_state: Option<PlayingState>,
     num_frames: usize,
-    blocks_factory: BlocksFactory,
+    blocks_factory: Factory,
     next_cargo: Option<Cargo>,
     descending_cargo: Option<Cargo>,
     num_ticks_for_cargo_descent: usize,
@@ -95,7 +95,7 @@ pub struct Playing {
     matching: Option<Matching>,
     scoring: Scoring,
     paused_blocks: Option<Vec<Block>>,
-    playing_state_when_paused: Option<Option<PlayingState>>,
+    playing_state_when_paused: Option<PlayingState>,
     game_info_when_paused: Option<GameInfo>,
     num_frames_pause: usize,
 }
@@ -104,7 +104,7 @@ impl Playing {
     pub fn new(resources: &Resources) -> Self {
         // REPLAY FROM SNAPSHOT --> FIXME remove when the game is finished
         let mut playing_state = None;
-        let mut blocks_factory = BlocksFactory::new();
+        let mut blocks_factory = Factory::new();
         let mut next_cargo = None;
         let mut pile = Pile::new();
 
@@ -125,7 +125,7 @@ impl Playing {
                 //println!("-----------------------------------\n");
 
                 //println!("/// Matching::new() ...");
-                matching = Some(Matching::new(matches, &mut pile));
+                matching = Some(Matching::new(&matches, &mut pile));
             }
             //
 
@@ -209,20 +209,13 @@ impl Playing {
         self.paused_blocks = Some(self.get_all_visible_blocks());
         self.shuffle_block_colors();
 
-        self.playing_state_when_paused = Some(self.playing_state);
+        self.playing_state_when_paused = self.playing_state;
         self.playing_state = Some(PlayingState::Pause);
 
         self.game_info_when_paused = self.hud.game_info.clone();
         self.hud.set_game_info(GameInfoType::Pause);
 
         self.num_frames_pause = 0;
-    }
-
-    fn game_over(&mut self) {
-        //println!("Playing.game_over()");
-        self.scoring.save_highscore();
-        self.hud.set_game_info(GameInfoType::GameOver);
-        self.playing_state = Some(PlayingState::GameOver);
     }
 
     fn get_all_visible_blocks(&self) -> Vec<Block> {
@@ -268,6 +261,13 @@ impl Playing {
         }
     }
 
+    fn game_over(&mut self) {
+        //println!("Playing.game_over()");
+        self.scoring.save_highscore();
+        self.hud.set_game_info(GameInfoType::GameOver);
+        self.playing_state = Some(PlayingState::GameOver);
+    }
+
     fn quit_to_main_menu(&mut self) {
         //println!("Playing.quit_to_main_menu()");
         // FIXME refactor
@@ -277,220 +277,230 @@ impl Playing {
         self.paused_blocks = None;
         self.matching = None;
     }
+
+    /*** UPDATE'S PLAYING STATE VARIANTS [BEGIN] ***/
+    fn update_state_ready(&mut self, input_event: &Event) {
+        if self.hud.game_info.is_none() {
+            self.hud.set_game_info(GameInfoType::Ready);
+        }
+
+        if self.next_cargo.is_none() {
+            self.next_cargo = Some(self.blocks_factory.create_next_cargo());
+        }
+
+        match input_event {
+            Event::Enter => {
+                self.hud.set_game_info(GameInfoType::Go);
+                self.playing_state = Some(PlayingState::DescendingCargo);
+                //println!("PlayingState::DescendingCargo =>");
+            }
+            Event::Escape => {
+                //println!("### Stage::Playing / Ready -> Stage::MainMenu");
+                //return Some(Stage::MainMenu);
+                self.quit_to_main_menu();
+            }
+            _ => (),
+        };
+    }
+
+    fn update_state_descending_cargo(&mut self, input_event: &Event) {
+        self.num_frames += 1;
+        if let Event::Escape | Event::LostFocus = input_event {
+            self.pause();
+            //println!("PlayingState::Pause =>");
+        }
+
+        if self.is_cargo_at_bottom && self.is_descending_over {
+            self.begin_next_cargo_descent();
+            self.is_cargo_at_bottom = self
+                .descending_cargo
+                .as_mut()
+                .unwrap()
+                .descend_one_step(&self.pile);
+            self.is_descending_over = false;
+        }
+
+        if self.num_frames % self.num_ticks_for_cargo_descent == 0
+            && self.descending_cargo.is_none()
+        {
+            self.begin_next_cargo_descent();
+            self.is_descending_over = false;
+        }
+
+        if let Some(descending_cargo) = self.descending_cargo.as_mut() {
+            self.is_cargo_at_bottom = descending_cargo.is_at_bottom(&self.pile);
+            if self.num_frames % self.num_ticks_for_cargo_descent == 0 && self.is_cargo_at_bottom {
+                self.is_descending_over = true;
+            }
+
+            if !self.is_descending_over {
+                match input_event {
+                    Event::Right => descending_cargo.move_to_right(&self.pile),
+                    Event::Left => descending_cargo.move_to_left(&self.pile),
+                    Event::Up => descending_cargo.rearrange_up(),
+                    Event::Down => descending_cargo.rearrange_down(),
+                    Event::Drop => {
+                        descending_cargo.drop(&self.pile);
+                        self.is_descending_over = true;
+                    }
+                    _ => (),
+                };
+            }
+
+            if self.num_frames % self.num_ticks_for_cargo_descent == 0
+                && (!self.is_descending_over || self.is_cargo_at_bottom)
+            {
+                self.is_cargo_at_bottom = descending_cargo.descend_one_step(&self.pile);
+            }
+
+            if self.is_descending_over {
+                self.num_descended_cargoes += 1;
+
+                let num_of_remaining_places_in_column = self
+                    .pile
+                    .take_cargo(&mem::take(&mut self.descending_cargo).unwrap());
+
+                if num_of_remaining_places_in_column < 0 {
+                    self.game_over();
+                    //println!("PlayingState::GameOver =>");
+                } else {
+                    let matches = self.pile.search_for_matches();
+                    if matches.is_empty() {
+                        if num_of_remaining_places_in_column == 0 {
+                            self.game_over();
+                            //println!("PlayingState::GameOver =>");
+                        }
+                    } else {
+                        //println!("\n>>> {:?}", matches);
+                        //self.pile.__print();
+                        //println!("-----------------------------------\n");
+
+                        self.matching = Some(Matching::new(&matches, &mut self.pile));
+
+                        self.playing_state = Some(PlayingState::HandlingMatches);
+                        //println!("PlayingState::HandlingMatches =>");
+                        self.num_frames = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    fn update_state_handling_matches(&mut self, input_event: &Event) {
+        self.num_frames += 1;
+        if let Event::Escape | Event::LostFocus = input_event {
+            self.pause();
+            //println!("PlayingState::Pause =>");
+        }
+
+        if let Some(matching) = self.matching.as_mut() {
+            let is_animation_over = matching.blinking_animation(self.num_frames);
+            if is_animation_over {
+                let is_pile_full = self
+                    .pile
+                    .remove_matches(matching.get_unique_match_indexes());
+
+                /*println!(
+                    "AFTER REMOVAL (sequential matchings: {}):",
+                    matching.get_num_of_sequential_matchings()
+                );
+                self.pile.__print();*/
+
+                self.scoring
+                    .update_from_matches(matching.get_scoring_data());
+                self.hud.update_scoring(&self.scoring);
+
+                let next_matches = self.pile.search_for_matches();
+                if next_matches.is_empty() {
+                    //println!("===================================\n");
+                    if is_pile_full {
+                        self.game_over();
+                        //println!("PlayingState::GameOver =>");
+                    } else {
+                        self.playing_state = Some(PlayingState::DescendingCargo);
+                        //println!("PlayingState::DescendingCargo =>");
+                        self.num_frames = 0;
+                    }
+                    self.matching = None;
+                } else {
+                    //println!("\n>>> {:?}", next_matches);
+                    matching.new_chained_match(&next_matches, &mut self.pile);
+
+                    self.num_frames = 0; // TODO needed?
+                }
+            }
+        // for REPLAY FROM SNAPSHOT --> FIXME remove when the game is finished
+        } else {
+            self.playing_state = Some(PlayingState::DescendingCargo);
+            //println!("PlayingState::DescendingCargo =>");
+            self.num_frames = 0;
+        }
+    }
+
+    fn update_state_pause(&mut self, input_event: &Event) {
+        //println!("// PlayingState::Pause");
+        self.num_frames_pause += 1;
+        if self.num_frames_pause % NUM_TICKS_FOR_PAUSED_BLOCKS_SHUFFLE == 0 {
+            self.shuffle_block_colors();
+        }
+        match input_event {
+            Event::Enter => {
+                self.paused_blocks = None;
+
+                self.playing_state = self.playing_state_when_paused;
+                self.playing_state_when_paused = None;
+
+                self.hud.game_info = self.game_info_when_paused.clone();
+                self.game_info_when_paused = None;
+            }
+            Event::Escape => {
+                //println!("### Stage::Playing / Pause -> Stage::MainMenu");
+                //return Some(Stage::MainMenu);
+                self.quit_to_main_menu();
+            }
+            _ => (),
+        };
+    }
+
+    fn update_state_game_over(&mut self, input_event: &Event) {
+        //println!("// PlayingState::GameOver");
+        match input_event {
+            Event::Enter => {
+                //println!("PlayingState::None =>");
+                self.playing_state = None;
+                self.hud.set_game_info(GameInfoType::None);
+            }
+            Event::Escape => {
+                //println!("### Stage::Playing / GameOver -> Stage::MainMenu");
+                //return Some(Stage::MainMenu);
+                self.quit_to_main_menu();
+            }
+            _ => (),
+        };
+    }
+    /*** UPDATE'S PLAYING STATE VARIANTS [END] ***/
 }
 
 impl StageTrait for Playing {
-    fn update(&mut self, input_event: InputEvent) -> Option<Stage> {
+    fn update(&mut self, input_event: Event) -> Option<Stage> {
         //InputEvent::__print(&input_event);
         /*if let None = self.playing_state {
             self.new_game();
         }*/
         match self.playing_state {
             None => self.new_game(),
-            Some(PlayingState::Ready) => {
-                if self.hud.game_info.is_none() {
-                    self.hud.set_game_info(GameInfoType::Ready);
-                }
-
-                if self.next_cargo.is_none() {
-                    self.next_cargo = Some(self.blocks_factory.create_next_cargo());
-                }
-
-                match input_event {
-                    InputEvent::Enter => {
-                        self.hud.set_game_info(GameInfoType::Go);
-                        self.playing_state = Some(PlayingState::DescendingCargo);
-                        //println!("PlayingState::DescendingCargo =>");
-                    }
-                    InputEvent::Escape => {
-                        //println!("### Stage::Playing / Ready -> Stage::MainMenu");
-                        //return Some(Stage::MainMenu);
-                        self.quit_to_main_menu();
-                    }
-                    _ => (),
-                }
-            }
-            Some(PlayingState::DescendingCargo) => {
-                self.num_frames += 1;
-                if let InputEvent::Escape | InputEvent::LostFocus = input_event {
-                    self.pause();
-                    //println!("PlayingState::Pause =>");
-                }
-
-                if self.is_cargo_at_bottom && self.is_descending_over {
-                    self.begin_next_cargo_descent();
-                    self.is_cargo_at_bottom = self
-                        .descending_cargo
-                        .as_mut()
-                        .unwrap()
-                        .descend_one_step(&self.pile);
-                    self.is_descending_over = false;
-                }
-
-                if self.num_frames % self.num_ticks_for_cargo_descent == 0
-                    && self.descending_cargo.is_none()
-                {
-                    self.begin_next_cargo_descent();
-                    self.is_descending_over = false;
-                }
-
-                if let Some(descending_cargo) = self.descending_cargo.as_mut() {
-                    self.is_cargo_at_bottom = descending_cargo.is_at_bottom(&self.pile);
-                    if self.num_frames % self.num_ticks_for_cargo_descent == 0
-                        && self.is_cargo_at_bottom
-                    {
-                        self.is_descending_over = true;
-                    }
-
-                    if !self.is_descending_over {
-                        match input_event {
-                            InputEvent::Right => descending_cargo.move_to_right(&self.pile),
-                            InputEvent::Left => descending_cargo.move_to_left(&self.pile),
-                            InputEvent::Up => descending_cargo.rearrange_up(),
-                            InputEvent::Down => descending_cargo.rearrange_down(),
-                            InputEvent::Drop => {
-                                descending_cargo.drop(&self.pile);
-                                self.is_descending_over = true;
-                            }
-                            _ => (),
-                        }
-                    }
-
-                    if self.num_frames % self.num_ticks_for_cargo_descent == 0
-                        && (!self.is_descending_over || self.is_cargo_at_bottom)
-                    {
-                        self.is_cargo_at_bottom = descending_cargo.descend_one_step(&self.pile);
-                    }
-
-                    if self.is_descending_over {
-                        self.num_descended_cargoes += 1;
-
-                        let num_of_remaining_places_in_column = self
-                            .pile
-                            .take_cargo(mem::take(&mut self.descending_cargo).unwrap());
-
-                        if num_of_remaining_places_in_column < 0 {
-                            self.game_over();
-                            //println!("PlayingState::GameOver =>");
-                        } else {
-                            let matches = self.pile.search_for_matches();
-                            if matches.is_empty() {
-                                if num_of_remaining_places_in_column == 0 {
-                                    self.game_over();
-                                    //println!("PlayingState::GameOver =>");
-                                }
-                            } else {
-                                //println!("\n>>> {:?}", matches);
-                                //self.pile.__print();
-                                //println!("-----------------------------------\n");
-
-                                self.matching = Some(Matching::new(matches, &mut self.pile));
-
-                                self.playing_state = Some(PlayingState::HandlingMatches);
-                                //println!("PlayingState::HandlingMatches =>");
-                                self.num_frames = 0;
-                            }
-                        }
-                    }
-                }
-            }
-            Some(PlayingState::HandlingMatches) => {
-                self.num_frames += 1;
-                if let InputEvent::Escape | InputEvent::LostFocus = input_event {
-                    self.pause();
-                    //println!("PlayingState::Pause =>");
-                }
-
-                if let Some(matching) = self.matching.as_mut() {
-                    let is_animation_over = matching.blinking_animation(self.num_frames);
-                    if is_animation_over {
-                        let is_pile_full = self
-                            .pile
-                            .remove_matches(matching.get_unique_match_indexes());
-
-                        /*println!(
-                            "AFTER REMOVAL (sequential matchings: {}):",
-                            matching.get_num_of_sequential_matchings()
-                        );
-                        self.pile.__print();*/
-
-                        self.scoring
-                            .update_from_matches(matching.get_scoring_data());
-                        self.hud.update_scoring(&self.scoring);
-
-                        let next_matches = self.pile.search_for_matches();
-                        if !next_matches.is_empty() {
-                            //println!("\n>>> {:?}", next_matches);
-                            matching.new_chained_match(next_matches, &mut self.pile);
-
-                            self.num_frames = 0; // TODO needed?
-                        } else {
-                            //println!("===================================\n");
-                            if is_pile_full {
-                                self.game_over();
-                                //println!("PlayingState::GameOver =>");
-                            } else {
-                                self.playing_state = Some(PlayingState::DescendingCargo);
-                                //println!("PlayingState::DescendingCargo =>");
-                                self.num_frames = 0;
-                            }
-                            self.matching = None;
-                        }
-                    }
-                // for REPLAY FROM SNAPSHOT --> FIXME remove when the game is finished
-                } else {
-                    self.playing_state = Some(PlayingState::DescendingCargo);
-                    //println!("PlayingState::DescendingCargo =>");
-                    self.num_frames = 0;
-                }
-            }
-            Some(PlayingState::Pause) => {
-                //println!("// PlayingState::Pause");
-                self.num_frames_pause += 1;
-                if self.num_frames_pause % NUM_TICKS_FOR_PAUSED_BLOCKS_SHUFFLE == 0 {
-                    self.shuffle_block_colors();
-                }
-                match input_event {
-                    InputEvent::Enter => {
-                        self.paused_blocks = None;
-
-                        self.playing_state = self.playing_state_when_paused.unwrap();
-                        self.playing_state_when_paused = None;
-
-                        self.hud.game_info = self.game_info_when_paused.clone();
-                        self.game_info_when_paused = None;
-                    }
-                    InputEvent::Escape => {
-                        //println!("### Stage::Playing / Pause -> Stage::MainMenu");
-                        //return Some(Stage::MainMenu);
-                        self.quit_to_main_menu();
-                    }
-                    _ => (),
-                }
-            }
-            Some(PlayingState::GameOver) => {
-                //println!("// PlayingState::GameOver");
-                match input_event {
-                    InputEvent::Enter => {
-                        //println!("PlayingState::None =>");
-                        self.playing_state = None;
-                        self.hud.set_game_info(GameInfoType::None);
-                    }
-                    InputEvent::Escape => {
-                        //println!("### Stage::Playing / GameOver -> Stage::MainMenu");
-                        //return Some(Stage::MainMenu);
-                        self.quit_to_main_menu();
-                    }
-                    _ => (),
-                }
-            }
+            Some(PlayingState::Ready) => self.update_state_ready(&input_event),
+            Some(PlayingState::DescendingCargo) => self.update_state_descending_cargo(&input_event),
+            Some(PlayingState::HandlingMatches) => self.update_state_handling_matches(&input_event),
+            Some(PlayingState::Pause) => self.update_state_pause(&input_event),
+            Some(PlayingState::GameOver) => self.update_state_game_over(&input_event),
             Some(PlayingState::QuittingToMainMenu) => {
                 //println!("// PlayingState::QuittingToMainMenu");
                 self.playing_state = None;
                 return Some(Stage::MainMenu);
             }
-        }
-        if let Some(PlayingState::DescendingCargo) | Some(PlayingState::HandlingMatches) =
+        };
+        if let Some(PlayingState::DescendingCargo | PlayingState::HandlingMatches) =
             self.playing_state
         {
             self.hud.update_game_info();
@@ -508,10 +518,10 @@ impl StageTrait for Playing {
             }
         } else {
             if let Some(next_cargo) = &mut self.next_cargo {
-                next_cargo.draw(ctx)
+                next_cargo.draw(ctx);
             }
             if let Some(descending_cargo) = &mut self.descending_cargo {
-                descending_cargo.draw(ctx)
+                descending_cargo.draw(ctx);
             }
             self.pile.draw(ctx);
             if let Some(matching) = &mut self.matching {

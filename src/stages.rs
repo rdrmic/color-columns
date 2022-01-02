@@ -1,6 +1,6 @@
 use ggez::Context;
 
-use crate::input::InputEvent;
+use crate::input::Event;
 
 pub mod credits;
 pub mod how_to_play;
@@ -16,6 +16,6 @@ pub enum Stage {
 }
 
 pub trait StageTrait {
-    fn update(&mut self, user_input: InputEvent) -> Option<Stage>;
+    fn update(&mut self, user_input: Event) -> Option<Stage>;
     fn draw(&mut self, ctx: &mut Context);
 }

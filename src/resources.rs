@@ -12,7 +12,7 @@ impl Resources {
         let fonts = Fonts::load(ctx);
         Resources {
             fonts,
-            navigation_instructions: NavigationInstructions::new(&fonts.get_light_italic()),
+            navigation_instructions: NavigationInstructions::new(fonts.get_light_italic()),
         }
     }
 

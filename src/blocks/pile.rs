@@ -1,5 +1,5 @@
 use std::{
-    cmp::min,
+    cmp::{max, min, Ord},
     collections::{HashMap, HashSet},
     mem,
 };
@@ -30,16 +30,16 @@ impl Pile {
     }
 
     pub fn from_snapshot(
-        matrix: [[Option<Block>; GAME_ARENA_ROWS]; GAME_ARENA_COLUMNS],
+        matrix: &[[Option<Block>; GAME_ARENA_ROWS]; GAME_ARENA_COLUMNS],
         column_tops: [(isize, f32); GAME_ARENA_COLUMNS],
     ) -> Self {
         Pile {
-            matrix,
+            matrix: *matrix,
             column_tops,
         }
     }
 
-    pub fn take_cargo(&mut self, cargo: Cargo) -> isize {
+    pub fn take_cargo(&mut self, cargo: &Cargo) -> isize {
         let pile_column_top = self.column_tops[cargo.column_idx];
         let mut pile_column_top_row_idx = pile_column_top.0;
 
@@ -57,77 +57,20 @@ impl Pile {
         spaces_to_fill - 3
     }
 
+    /*** SEARCHING FOR MATCHES [BEGIN] ***/
     pub fn search_for_matches(&self) -> HashMap<Direction, Vec<Vec<(usize, usize)>>> {
-        fn take_matches_if_collected(
-            direction: Direction,
-            collector: &mut Vec<(char, usize, usize)>,
-            matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
-        ) {
-            if collector.len() >= 3 {
-                let vec_of_matches = matches.entry(direction).or_insert_with(Vec::new);
-                let matches = collector
-                    .iter()
-                    .map(|m| (m.1, m.2))
-                    .collect::<Vec<(usize, usize)>>();
-                vec_of_matches.push(matches);
-            }
-            collector.clear();
-        }
-
-        fn search_sequence_for_vertical_matches(
-            direction: Direction,
-            sequence: &mut Vec<(char, usize, usize)>,
-            collector: &mut Vec<(char, usize, usize)>,
-            matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
-        ) {
-            for block_opt in sequence.iter() {
-                if let Some(previous_match) = collector.last() {
-                    if block_opt.0 != previous_match.0 {
-                        take_matches_if_collected(direction, collector, matches);
-                    }
-                }
-                collector.push(*block_opt);
-            }
-            take_matches_if_collected(direction, collector, matches);
-
-            sequence.clear();
-        }
-
-        fn search_sequence_for_matches(
-            direction: Direction,
-            sequence: &mut Vec<(char, usize, usize)>,
-            collector: &mut Vec<(char, usize, usize)>,
-            matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
-        ) {
-            for block_opt in sequence.iter() {
-                if block_opt.0 != NO_BLOCK_CODE {
-                    if let Some(previous_match) = collector.last() {
-                        if block_opt.0 != previous_match.0 {
-                            take_matches_if_collected(direction, collector, matches);
-                        }
-                    }
-                    collector.push(*block_opt);
-                } else {
-                    take_matches_if_collected(direction, collector, matches);
-                }
-            }
-            take_matches_if_collected(direction, collector, matches);
-
-            sequence.clear();
-        }
-
-        fn code_repr_from_block(block: &Option<Block>) -> char {
-            if let Some(block) = block {
-                return block.color.code;
-            }
-            NO_BLOCK_CODE
-        }
-
         let mut matches = HashMap::<Direction, Vec<Vec<(usize, usize)>>>::new();
+        self.collect_vertical_matches(&mut matches);
+        self.collect_horizontal_matches(&mut matches);
+        self.collect_diagonal_slash_matches(&mut matches);
+        self.collect_diagonal_backslash_matches(&mut matches);
+        matches
+    }
 
-        let mut sequence = Vec::new();
+    fn collect_vertical_matches(&self, matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>) {
+        let mut sequence = Vec::with_capacity(GAME_ARENA_ROWS);
         let mut matches_collector = Vec::<(char, usize, usize)>::with_capacity(5);
-        // VERTICAL
+
         for col_idx in 0..GAME_ARENA_COLUMNS {
             let column_top_idx = self.column_tops[col_idx].0;
             if column_top_idx >= 2 {
@@ -135,103 +78,193 @@ impl Pile {
                     let block = self.matrix[col_idx][row_idx as usize].unwrap();
                     sequence.push((block.color.code, col_idx, row_idx as usize));
                 }
-                search_sequence_for_vertical_matches(
+                Self::search_sequence_for_vertical_matches(
                     Direction::Vertical,
-                    &mut sequence,
+                    &sequence,
                     &mut matches_collector,
-                    &mut matches,
+                    matches,
                 );
+                sequence.clear();
             }
         }
-        // HORIZONTAL
+    }
+
+    fn collect_horizontal_matches(
+        &self,
+        matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
+    ) {
+        let mut sequence = Vec::with_capacity(GAME_ARENA_COLUMNS);
+        let mut matches_collector = Vec::<(char, usize, usize)>::with_capacity(5);
+
         let topmost_column_idx = self.get_topmost_column_idx();
         if topmost_column_idx > -1 {
             for row_idx in 0..=topmost_column_idx as usize {
                 for col_idx in 0..GAME_ARENA_COLUMNS {
-                    let code = code_repr_from_block(&self.matrix[col_idx][row_idx as usize]);
+                    let code = Self::get_block_code(&self.matrix[col_idx][row_idx as usize]);
                     sequence.push((code, col_idx, row_idx as usize));
                 }
-                search_sequence_for_matches(
+                Self::search_sequence_for_matches(
                     Direction::Horizontal,
-                    &mut sequence,
+                    &sequence,
                     &mut matches_collector,
-                    &mut matches,
+                    matches,
                 );
+                sequence.clear();
             }
         }
-        // DIAGONAL - SLASH
+    }
+
+    fn collect_diagonal_slash_matches(
+        &self,
+        matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
+    ) {
+        let mut sequence = Vec::with_capacity(max(GAME_ARENA_COLUMNS, GAME_ARENA_ROWS));
+        let mut matches_collector = Vec::<(char, usize, usize)>::with_capacity(5);
+
         let col_idx_start: usize = 0;
         for row_idx_start in (0..GAME_ARENA_ROWS - 2).rev() {
             let mut row_idx = row_idx_start;
             let mut col_idx = col_idx_start;
             while row_idx < GAME_ARENA_ROWS && col_idx < GAME_ARENA_COLUMNS {
-                let code = code_repr_from_block(&self.matrix[col_idx][row_idx as usize]);
+                let code = Self::get_block_code(&self.matrix[col_idx][row_idx as usize]);
                 sequence.push((code, col_idx, row_idx as usize));
                 row_idx += 1;
                 col_idx += 1;
             }
-            search_sequence_for_matches(
+            Self::search_sequence_for_matches(
                 Direction::DiagonalSlash,
-                &mut sequence,
+                &sequence,
                 &mut matches_collector,
-                &mut matches,
+                matches,
             );
+            sequence.clear();
         }
         let row_idx_start: usize = 0;
         for col_idx_start in 1..GAME_ARENA_COLUMNS - 2 {
             let mut row_idx = row_idx_start;
             let mut col_idx = col_idx_start;
             while row_idx < GAME_ARENA_ROWS && col_idx < GAME_ARENA_COLUMNS {
-                let code = code_repr_from_block(&self.matrix[col_idx][row_idx as usize]);
+                let code = Self::get_block_code(&self.matrix[col_idx][row_idx as usize]);
                 sequence.push((code, col_idx, row_idx as usize));
                 row_idx += 1;
                 col_idx += 1;
             }
-            search_sequence_for_matches(
+            Self::search_sequence_for_matches(
                 Direction::DiagonalSlash,
-                &mut sequence,
+                &sequence,
                 &mut matches_collector,
-                &mut matches,
+                matches,
             );
+            sequence.clear();
         }
-        // DIAGONAL - BACKSLASH
+    }
+
+    fn collect_diagonal_backslash_matches(
+        &self,
+        matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
+    ) {
+        let mut sequence = Vec::with_capacity(max(GAME_ARENA_COLUMNS, GAME_ARENA_ROWS));
+        let mut matches_collector = Vec::<(char, usize, usize)>::with_capacity(5);
+
         let row_idx_start: usize = 0;
         for col_idx_start in 2..GAME_ARENA_COLUMNS as isize {
             let mut row_idx = row_idx_start;
             let mut col_idx = col_idx_start;
             while row_idx < GAME_ARENA_ROWS && col_idx >= 0 {
-                let code = code_repr_from_block(&self.matrix[col_idx as usize][row_idx]);
+                let code = Self::get_block_code(&self.matrix[col_idx as usize][row_idx]);
                 sequence.push((code, col_idx as usize, row_idx as usize));
                 row_idx += 1;
                 col_idx -= 1;
             }
-            search_sequence_for_matches(
+            Self::search_sequence_for_matches(
                 Direction::DiagonalBackslash,
-                &mut sequence,
+                &sequence,
                 &mut matches_collector,
-                &mut matches,
+                matches,
             );
+            sequence.clear();
         }
         let col_idx_start = GAME_ARENA_COLUMNS as isize - 1;
         for row_idx_start in 1..GAME_ARENA_ROWS - 2 {
             let mut row_idx = row_idx_start;
             let mut col_idx = col_idx_start;
             while row_idx < GAME_ARENA_ROWS && col_idx >= 0 {
-                let code = code_repr_from_block(&self.matrix[col_idx as usize][row_idx]);
+                let code = Self::get_block_code(&self.matrix[col_idx as usize][row_idx]);
                 sequence.push((code, col_idx as usize, row_idx as usize));
                 row_idx += 1;
                 col_idx -= 1;
             }
-            search_sequence_for_matches(
+            Self::search_sequence_for_matches(
                 Direction::DiagonalBackslash,
-                &mut sequence,
+                &sequence,
                 &mut matches_collector,
-                &mut matches,
+                matches,
             );
+            sequence.clear();
         }
-
-        matches
     }
+
+    fn get_block_code(block: &Option<Block>) -> char {
+        if let Some(block) = block {
+            return block.color.code;
+        }
+        NO_BLOCK_CODE
+    }
+
+    fn search_sequence_for_vertical_matches(
+        direction: Direction,
+        sequence: &[(char, usize, usize)],
+        collector: &mut Vec<(char, usize, usize)>,
+        matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
+    ) {
+        for block_repr in sequence {
+            if let Some(previous_match) = collector.last() {
+                if block_repr.0 != previous_match.0 {
+                    Self::take_matches_from_collector(direction, collector, matches);
+                }
+            }
+            collector.push(*block_repr);
+        }
+        Self::take_matches_from_collector(direction, collector, matches);
+    }
+
+    fn search_sequence_for_matches(
+        direction: Direction,
+        sequence: &[(char, usize, usize)],
+        collector: &mut Vec<(char, usize, usize)>,
+        matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
+    ) {
+        for block_opt in sequence {
+            if block_opt.0 == NO_BLOCK_CODE {
+                Self::take_matches_from_collector(direction, collector, matches);
+            } else {
+                if let Some(previous_match) = collector.last() {
+                    if block_opt.0 != previous_match.0 {
+                        Self::take_matches_from_collector(direction, collector, matches);
+                    }
+                }
+                collector.push(*block_opt);
+            }
+        }
+        Self::take_matches_from_collector(direction, collector, matches);
+    }
+
+    fn take_matches_from_collector(
+        direction: Direction,
+        collector: &mut Vec<(char, usize, usize)>,
+        matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
+    ) {
+        if collector.len() >= 3 {
+            let vec_of_matches = matches.entry(direction).or_insert_with(Vec::new);
+            let matches = collector
+                .iter()
+                .map(|m| (m.1, m.2))
+                .collect::<Vec<(usize, usize)>>();
+            vec_of_matches.push(matches);
+        }
+        collector.clear();
+    }
+    /*** SEARCHING FOR MATCHES [END] ***/
 
     pub fn extract_matching_blocks(
         &mut self,
@@ -257,11 +290,9 @@ impl Pile {
                 .or_insert_with(Vec::new);
             row_idxs.push(row_idx);
         }
-
         // MAKE DANGLING BLOCKS FALL
         for (col_idx, row_idxs) in matched_blocks_row_idxs_by_col_idx {
-            let lowest_matched_block_idx =
-                *row_idxs.iter().min_by(|idx1, idx2| idx1.cmp(idx2)).unwrap();
+            let lowest_matched_block_idx = *row_idxs.iter().min_by(Ord::cmp).unwrap();
             let mut num_empty_slots: usize = 0;
             for row_idx in lowest_matched_block_idx..=self.column_tops[col_idx].0 as usize {
                 match mem::take(&mut self.matrix[col_idx][row_idx]) {
@@ -277,7 +308,6 @@ impl Pile {
             self.column_tops[col_idx].0 -= num_matched_blocks as isize;
             self.column_tops[col_idx].1 += num_matched_blocks as f32 * BLOCK_SIZE;
         }
-
         // CHECK IF PILE IS FULL (TOP OF UPMOST CARGO == TOP OF ARENA)
         self.get_topmost_column_idx() >= (GAME_ARENA_ROWS - 1) as isize
     }
@@ -304,7 +334,7 @@ impl Pile {
         for col_idx in 0..GAME_ARENA_COLUMNS {
             let column_top = self.column_tops[col_idx].0;
             if column_top > -1 {
-                for row_idx in 0..column_top as usize + 1 {
+                for row_idx in 0..=column_top as usize {
                     if let Some(block) = self.matrix[col_idx][row_idx] {
                         blocks.push(block);
                     }

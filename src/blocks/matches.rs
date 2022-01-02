@@ -37,9 +37,9 @@ type MatchingData = (
 );
 
 impl Matching {
-    pub fn new(matches: HashMap<Direction, Vec<Vec<(usize, usize)>>>, pile: &mut Pile) -> Self {
+    pub fn new(matches: &HashMap<Direction, Vec<Vec<(usize, usize)>>>, pile: &mut Pile) -> Self {
         let (num_of_matching_blocks, match_direction_indicators, unique_match_indexes, blocks) =
-            Self::extract_matching_data_from_matches(&matches, pile);
+            Self::extract_matching_data_from_matches(matches, pile);
 
         Matching {
             num_of_sequential_matchings: 1,
@@ -55,13 +55,13 @@ impl Matching {
 
     pub fn new_chained_match(
         &mut self,
-        matches: HashMap<Direction, Vec<Vec<(usize, usize)>>>,
+        matches: &HashMap<Direction, Vec<Vec<(usize, usize)>>>,
         pile: &mut Pile,
     ) {
         self.num_of_sequential_matchings += 1;
 
         let (num_of_matching_blocks, match_direction_indicators, unique_match_indexes, blocks) =
-            Self::extract_matching_data_from_matches(&matches, pile);
+            Self::extract_matching_data_from_matches(matches, pile);
 
         self.num_of_matching_blocks = num_of_matching_blocks;
         self.match_direction_indicators = match_direction_indicators;
@@ -132,7 +132,7 @@ impl Matching {
     }
 
     pub fn get_blocks(&self) -> Vec<Block> {
-        self.blocks.to_vec()
+        self.blocks.clone()
     }
 
     pub fn draw(&mut self, ctx: &mut Context) {

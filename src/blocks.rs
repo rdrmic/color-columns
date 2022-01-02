@@ -1,4 +1,10 @@
-#![allow(clippy::float_cmp)]
+#![allow(
+    clippy::float_cmp,
+    clippy::cast_possible_truncation,
+    clippy::cast_possible_wrap,
+    clippy::cast_precision_loss,
+    clippy::cast_sign_loss
+)]
 
 use std::fmt::{Display, Formatter, Result};
 
@@ -99,11 +105,11 @@ pub struct BlockColor {
 /*******************************************************************************
 **** BLOCKS FACTORY
 *******************************************************************************/
-pub struct BlocksFactory {
+pub struct Factory {
     rng: ThreadRng,
 }
 
-impl BlocksFactory {
+impl Factory {
     pub const COLORS: [BlockColor; 6] = [
         BLOCK_COLOR_RED,
         BLOCK_COLOR_GREEN,
@@ -114,7 +120,7 @@ impl BlocksFactory {
     ];
 
     pub fn new() -> Self {
-        BlocksFactory {
+        Factory {
             rng: rand::thread_rng(),
         }
     }

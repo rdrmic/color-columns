@@ -11,7 +11,7 @@ use crate::{
         HOWTOPLAY_CONTROLS_RIGHTSIDE_TEXT_POSITION_X, HOWTOPLAY_CONTROLS_TEXT_POSITION_Y,
         HOWTOPLAY_SCORING_CHAR_SCALE, HOWTOPLAY_SCORING_RULES_TEXT_POSITION,
     },
-    input::InputEvent,
+    input::Event,
     resources::Resources,
 };
 
@@ -89,7 +89,7 @@ impl HowToPlay {
             go_back_instruction: resources
                 .get_navigation_instructions()
                 .get_go_back()
-                .to_owned(),
+                .clone(),
             controls_leftside,
             controls_rightside,
             scoring_rules,
@@ -98,8 +98,8 @@ impl HowToPlay {
 }
 
 impl StageTrait for HowToPlay {
-    fn update(&mut self, input_event: InputEvent) -> Option<Stage> {
-        if let InputEvent::Escape = input_event {
+    fn update(&mut self, input_event: Event) -> Option<Stage> {
+        if let Event::Escape = input_event {
             //println!("### Stage::HowToPlay -> Stage::MainMenu");
             return Some(Stage::MainMenu);
         }
