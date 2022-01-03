@@ -19,7 +19,7 @@ pub struct Cargo {
 impl Cargo {
     pub fn new(blocks: [Block; 3]) -> Self {
         let first_block_rect = blocks[0].rect;
-        Cargo {
+        Self {
             blocks,
             rect: Rect::new(
                 first_block_rect.x,
@@ -75,7 +75,7 @@ impl Cargo {
         let pile_column_top = pile.column_tops[self.column_idx].1;
         self.rect.y = pile_column_top - self.rect.h;
         for i in 0..3 {
-            self.blocks[i].rect.y = self.rect.y + i as f32 * BLOCK_SIZE;
+            self.blocks[i].rect.y = BLOCK_SIZE.mul_add(i as f32, self.rect.y);
         }
     }
 

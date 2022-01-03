@@ -39,7 +39,7 @@ impl GameArena {
         border_rect.w += 1.0;
         border_rect.h += 1.0;
 
-        GameArena {
+        Self {
             border_rect,
             border_color: COLOR_GRAY,
         }
@@ -135,7 +135,7 @@ impl Playing {
               println!("=> PlayingState::Ready");
           }*/
 
-        Playing {
+        Self {
             hud: Hud::new(resources),
             game_arena: GameArena::new(),
             playing_state,

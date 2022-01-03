@@ -1,15 +1,23 @@
-#![warn(clippy::all, clippy::pedantic)]
+#![deny(clippy::all)] // correctness, suspicious, style, complexity, perf
+#![warn(clippy::pedantic)]
+#![warn(clippy::nursery)]
+#![warn(clippy::cargo)]
+// from clippy::restriction:
+#![warn(clippy::todo, clippy::print_stdout)]
+//#![warn(clippy::unwrap_used)]
 #![windows_subsystem = "windows"]
 
 use std::{env, mem, path::PathBuf};
-
-//use winit::dpi::LogicalPosition;
 
 use ggez::{
     conf::WindowMode,
     event::{self, EventHandler, KeyCode, KeyMods},
     graphics::{self, Color},
-    Context, ContextBuilder, GameError, GameResult,
+    //winit::dpi::PhysicalPosition,
+    Context,
+    ContextBuilder,
+    GameError,
+    GameResult,
 };
 
 use config::{FPS, WINDOW_HEIGHT, WINDOW_TITLE, WINDOW_WIDTH};
@@ -44,16 +52,29 @@ fn main() {
     // CREATE GAME CONTEXT
     let (mut ctx, event_loop) =
         ContextBuilder::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_AUTHORS"))
-            .window_mode(WindowMode::default().dimensions(WINDOW_WIDTH, WINDOW_HEIGHT))
+            .window_mode(
+                WindowMode::default()
+                    .dimensions(WINDOW_WIDTH, WINDOW_HEIGHT)
+                    .visible(false),
+            )
             .add_resource_path(resource_dir)
             .build()
             .unwrap();
-    // SET WINDOW POSITION
-    //graphics::set_window_position(&ctx, LogicalPosition::new(1000.0, 20.0)).unwrap();     // FIXME
+    // SET WINDOW POSITION  // TODO
+    //graphics::set_window_position(&ctx, PhysicalPosition::new(1000.0, 20.0)).unwrap();
+
+    let window = graphics::window(&ctx);
+    //window.set_outer_position(PhysicalPosition::new(350.0, 50.0));
+    window.set_cursor_visible(false);
+    //window.set_title(title)
+    //window.set_window_icon(window_icon)
+    window.set_visible(true);
+
     // SET WINDOW TITLE
     let app_version = env!("CARGO_PKG_VERSION");
     let window_title = format!("{} {}", WINDOW_TITLE, app_version);
     graphics::set_window_title(&ctx, &window_title);
+    //graphics::set_window_icon(&mut ctx, Some("")).unwrap();   // TODO
     // CREATE APP STATE
     let app_state = AppState::new(&mut ctx, Stage::MainMenu);
     // RUN MAIN LOOP
@@ -72,7 +93,7 @@ struct AppState {
 impl AppState {
     fn new(ctx: &mut Context, initial_stage: Stage) -> Self {
         let resources = Resources::new(ctx);
-        AppState {
+        Self {
             stages: vec![
                 Box::new(MainMenu::new(&resources, ctx)),
                 Box::new(Playing::new(&resources)),

@@ -1,3 +1,5 @@
+#![allow(clippy::missing_const_for_fn)]
+
 use std::fs::{self, File};
 use std::io::{Read, Write};
 
@@ -23,7 +25,7 @@ impl Scoring {
     const HIGHSCORE_FILENAME: &'static str = "cc_hs";
 
     pub fn new(highscore: usize) -> Self {
-        Scoring {
+        Self {
             score: 0,
             maxcombo: 0,
             is_new_maxcombo: false,

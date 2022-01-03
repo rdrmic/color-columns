@@ -3,7 +3,8 @@
     clippy::cast_possible_truncation,
     clippy::cast_possible_wrap,
     clippy::cast_precision_loss,
-    clippy::cast_sign_loss
+    clippy::cast_sign_loss,
+    clippy::missing_const_for_fn
 )]
 
 use std::fmt::{Display, Formatter, Result};
@@ -41,7 +42,7 @@ pub fn position_to_idx(pos: f32, axis: char) -> usize {
 pub fn idx_to_position(idx: usize, axis: char) -> f32 {
     let position: f32;
     if axis == 'x' {
-        position = GAME_ARENA_RECT.left() + BLOCK_SIZE * idx as f32;
+        position = BLOCK_SIZE.mul_add(idx as f32, GAME_ARENA_RECT.left());
     } else if axis == 'y' {
         position = (GAME_ARENA_RECT.bottom() - BLOCK_SIZE * idx as f32) - BLOCK_SIZE;
     } else {
@@ -53,7 +54,7 @@ pub fn idx_to_position(idx: usize, axis: char) -> f32 {
 // TODO glam::Vec2::new(10.0, 10.0)
 pub fn idx_pair_to_center_point_of_block(idxs: &(usize, usize)) -> Point2<f32> {
     Point2 {
-        x: (GAME_ARENA_RECT.left() + BLOCK_SIZE * idxs.0 as f32) + BLOCK_SIZE / 2.0,
+        x: BLOCK_SIZE.mul_add(idxs.0 as f32, GAME_ARENA_RECT.left()) + BLOCK_SIZE / 2.0,
         y: (GAME_ARENA_RECT.bottom() - BLOCK_SIZE * idxs.1 as f32) - BLOCK_SIZE + BLOCK_SIZE / 2.0,
     }
 }
@@ -70,7 +71,7 @@ pub struct Block {
 impl Block {
     // TODO glam::Vec2::new(10.0, 10.0)
     pub fn new(point: Point2<f32>, size: f32, color: BlockColor) -> Self {
-        Block {
+        Self {
             rect: Rect::new(point.x, point.y, size, size),
             color,
         }
@@ -120,7 +121,7 @@ impl Factory {
     ];
 
     pub fn new() -> Self {
-        Factory {
+        Self {
             rng: rand::thread_rng(),
         }
     }
@@ -136,30 +137,32 @@ impl Factory {
         let blocks = [
             color_block_randomly(Point2 {
                 x,
-                y: y + BLOCK_SIZE * 0.0,
+                y: BLOCK_SIZE.mul_add(0.0, y),
             }),
             color_block_randomly(Point2 {
                 x,
-                y: y + BLOCK_SIZE * 1.0,
+                y: BLOCK_SIZE.mul_add(1.0, y),
             }),
             color_block_randomly(Point2 {
                 x,
-                y: y + BLOCK_SIZE * 2.0,
+                y: BLOCK_SIZE.mul_add(2.0, y),
             }),
         ];
         Cargo::new(blocks)
     }
 
     pub fn put_cargo_in_arena(&mut self, mut cargo: Cargo) -> Cargo {
-        let x =
-            GAME_ARENA_RECT.left() + BLOCK_SIZE * self.rng.gen_range(0..GAME_ARENA_COLUMNS) as f32;
+        let x = BLOCK_SIZE.mul_add(
+            self.rng.gen_range(0..GAME_ARENA_COLUMNS) as f32,
+            GAME_ARENA_RECT.left(),
+        );
         let y = GAME_ARENA_RECT.top() - BLOCK_SIZE * 3.0;
         cargo.rect.x = x;
         cargo.rect.y = y;
         cargo.column_idx = position_to_idx(cargo.rect.x, 'x');
         for i in 0..3 {
             cargo.blocks[i].rect.x = x;
-            cargo.blocks[i].rect.y = y + i as f32 * BLOCK_SIZE;
+            cargo.blocks[i].rect.y = BLOCK_SIZE.mul_add(i as f32, y);
         }
         cargo
     }

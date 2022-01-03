@@ -1,4 +1,4 @@
-#![allow(clippy::cast_precision_loss)]
+#![allow(clippy::cast_precision_loss, clippy::suboptimal_flops)]
 
 use ggez::graphics::{Color, Rect};
 

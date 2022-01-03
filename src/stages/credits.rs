@@ -45,7 +45,7 @@ impl Credits {
             Align::Left,
         );
 
-        Credits {
+        Self {
             go_back_instruction: resources
                 .get_navigation_instructions()
                 .get_go_back()

@@ -41,7 +41,7 @@ impl Matching {
         let (num_of_matching_blocks, match_direction_indicators, unique_match_indexes, blocks) =
             Self::extract_matching_data_from_matches(matches, pile);
 
-        Matching {
+        Self {
             num_of_sequential_matchings: 1,
 
             num_of_matching_blocks,

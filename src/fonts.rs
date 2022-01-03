@@ -9,22 +9,22 @@ pub struct Fonts {
 
 impl Fonts {
     pub fn load(ctx: &mut Context) -> Self {
-        Fonts {
+        Self {
             extra_bold: Font::new(ctx, "/ArgentumSans-ExtraBold.otf").unwrap(),
             semi_bold: Font::new(ctx, "/ArgentumSans-SemiBold.otf").unwrap(),
             light_italic: Font::new(ctx, "/ArgentumSans-LightItalic.otf").unwrap(),
         }
     }
 
-    pub fn get_extra_bold(&self) -> Font {
+    pub const fn get_extra_bold(&self) -> Font {
         self.extra_bold
     }
 
-    pub fn get_semi_bold(&self) -> Font {
+    pub const fn get_semi_bold(&self) -> Font {
         self.semi_bold
     }
 
-    pub fn get_light_italic(&self) -> Font {
+    pub const fn get_light_italic(&self) -> Font {
         self.light_italic
     }
 }

@@ -85,7 +85,7 @@ impl HowToPlay {
             Align::Left,
         );
 
-        HowToPlay {
+        Self {
             go_back_instruction: resources
                 .get_navigation_instructions()
                 .get_go_back()

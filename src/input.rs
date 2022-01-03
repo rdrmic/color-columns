@@ -15,7 +15,7 @@ pub enum Event {
 
 impl Default for Event {
     fn default() -> Self {
-        Event::None
+        Self::None
     }
 }
 

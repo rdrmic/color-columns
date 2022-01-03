@@ -28,7 +28,7 @@ struct ItemLabels {
 
 impl ItemLabels {
     pub fn new(font: Font) -> Self {
-        ItemLabels {
+        Self {
             play: Self::create_item_label(font, "PLAY", COLOR_GREEN),
             how_to_play: Self::create_item_label(font, "HOW TO PLAY", COLOR_YELLOW),
             credits: Self::create_item_label(font, "CREDITS", COLOR_BLUE),
@@ -62,7 +62,7 @@ struct SelectedItemBlocksPositions {
 impl SelectedItemBlocksPositions {
     fn new(item_widths: [f32; 3]) -> Self {
         let positions = Self::create_blocks_positions(item_widths);
-        SelectedItemBlocksPositions {
+        Self {
             play: positions[0],
             how_to_play: positions[1],
             credits: positions[2],
@@ -100,7 +100,7 @@ struct SelectedItemIndicator {
 
 impl SelectedItemIndicator {
     fn new(item_widths: [f32; 3]) -> Self {
-        SelectedItemIndicator {
+        Self {
             blocks_positions: SelectedItemBlocksPositions::new(item_widths),
         }
     }
@@ -169,7 +169,7 @@ impl MainMenu {
         let initially_selected_item_blocks =
             selected_item_indicator.create_blocks(initially_selected_item);
 
-        MainMenu {
+        Self {
             item_labels,
             selected_item_indicator,
             selected_item_idx: initially_selected_item_idx,

@@ -10,17 +10,17 @@ pub struct Resources {
 impl Resources {
     pub fn new(ctx: &mut Context) -> Self {
         let fonts = Fonts::load(ctx);
-        Resources {
+        Self {
             fonts,
             navigation_instructions: NavigationInstructions::new(fonts.get_light_italic()),
         }
     }
 
-    pub fn get_fonts(&self) -> &Fonts {
+    pub const fn get_fonts(&self) -> &Fonts {
         &self.fonts
     }
 
-    pub fn get_navigation_instructions(&self) -> &NavigationInstructions {
+    pub const fn get_navigation_instructions(&self) -> &NavigationInstructions {
         &self.navigation_instructions
     }
 }

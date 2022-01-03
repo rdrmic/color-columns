@@ -23,7 +23,7 @@ pub struct Pile {
 
 impl Pile {
     pub fn new() -> Self {
-        Pile {
+        Self {
             matrix: [[None; GAME_ARENA_ROWS]; GAME_ARENA_COLUMNS],
             column_tops: [(-1, GAME_ARENA_RECT.bottom()); GAME_ARENA_COLUMNS],
         }
@@ -33,7 +33,7 @@ impl Pile {
         matrix: &[[Option<Block>; GAME_ARENA_ROWS]; GAME_ARENA_COLUMNS],
         column_tops: [(isize, f32); GAME_ARENA_COLUMNS],
     ) -> Self {
-        Pile {
+        Self {
             matrix: *matrix,
             column_tops,
         }

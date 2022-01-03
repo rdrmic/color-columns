@@ -30,9 +30,8 @@ pub fn create_pile_from_file() -> Pile {
     let mut matrix = [[Option::<Block>::None; GAME_ARENA_ROWS]; GAME_ARENA_COLUMNS];
     for (row_idx, row) in matrix_snapshot_vec.iter().enumerate() {
         for (col_idx, snapshot_block_code) in row.iter().enumerate() {
-            let block;
-            if *snapshot_block_code == NO_BLOCK_CODE {
-                block = None;
+            let block = if *snapshot_block_code == NO_BLOCK_CODE {
+                None
             } else {
                 let point = Point2 {
                     x: idx_to_position(col_idx, 'x'),
@@ -42,8 +41,8 @@ pub fn create_pile_from_file() -> Pile {
                     .into_iter()
                     .find(|color| color.code == *snapshot_block_code)
                     .expect("Snapshot's colors don't match those in app!");
-                block = Some(Block::new(point, BLOCK_SIZE, color));
-            }
+                Some(Block::new(point, BLOCK_SIZE, color))
+            };
             matrix[col_idx][row_idx] = block;
         }
     }

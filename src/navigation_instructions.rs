@@ -17,8 +17,8 @@ pub struct NavigationInstructions {
 
 impl NavigationInstructions {
     pub fn new(font: Font) -> Self {
-        let label_factory = NavigationInstructionsFactory::new(font);
-        NavigationInstructions {
+        let label_factory = Factory::new(font);
+        Self {
             // PLAYING
             playing_ready: label_factory.create_label("'Enter' to start\n'Esc' to main menu"),
             playing_go: label_factory.create_label("Press 'Esc' to pause"),
@@ -31,23 +31,23 @@ impl NavigationInstructions {
         }
     }
 
-    pub fn get_playing_ready(&self) -> &Text {
+    pub const fn get_playing_ready(&self) -> &Text {
         &self.playing_ready
     }
 
-    pub fn get_playing_go(&self) -> &Text {
+    pub const fn get_playing_go(&self) -> &Text {
         &self.playing_go
     }
 
-    pub fn get_playing_pause(&self) -> &Text {
+    pub const fn get_playing_pause(&self) -> &Text {
         &self.playing_pause
     }
 
-    pub fn get_playing_gameover(&self) -> &Text {
+    pub const fn get_playing_gameover(&self) -> &Text {
         &self.playing_gameover
     }
 
-    pub fn get_go_back(&self) -> &Text {
+    pub const fn get_go_back(&self) -> &Text {
         &self.go_back
     }
 }
@@ -55,15 +55,15 @@ impl NavigationInstructions {
 /*******************************************************************************
 **** NAVIGATION INSTRUCTIONS FACTORY
 *******************************************************************************/
-struct NavigationInstructionsFactory {
+struct Factory {
     color: Option<Color>,
     font: Option<Font>,
     scale: Option<PxScale>,
 }
 
-impl NavigationInstructionsFactory {
+impl Factory {
     pub fn new(font: Font) -> Self {
-        NavigationInstructionsFactory {
+        Self {
             color: Some(COLOR_GRAY),
             font: Some(font),
             scale: Some(PxScale::from(NAVIGATION_INSTRUCTIONS_CHAR_SCALE)),

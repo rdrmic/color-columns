@@ -47,7 +47,7 @@ impl HudLabels {
 
         let navigation_instructions = resources.get_navigation_instructions();
 
-        HudLabels {
+        Self {
             // PLAYING STATES
             game_info_playing_state_ready: Self::create_playing_state_label(
                 font_extra_bold,
@@ -122,13 +122,13 @@ pub struct Hud {
     pub maxspeed_reached: bool,
 
     scoring_values_font: Font,
-    scoring_values: HudScoringValues,
+    scoring_values: ScoringValues,
 }
 
 impl Hud {
     pub fn new(resources: &Resources) -> Self {
         let font_semi_bold = resources.get_fonts().get_semi_bold();
-        Hud {
+        Self {
             labels: HudLabels::new(resources),
 
             game_info: None,
@@ -137,7 +137,7 @@ impl Hud {
             maxspeed_reached: false,
 
             scoring_values_font: font_semi_bold,
-            scoring_values: HudScoringValues::new(font_semi_bold, 0), // FIXME refactor
+            scoring_values: ScoringValues::new(font_semi_bold, 0), // FIXME refactor
         }
     }
 
@@ -146,7 +146,7 @@ impl Hud {
         self.num_blinks = 0;
         self.maxspeed_reached = false;
 
-        self.scoring_values = HudScoringValues::new(self.scoring_values_font, highscore);
+        self.scoring_values = ScoringValues::new(self.scoring_values_font, highscore);
     }
 
     pub fn set_game_info(&mut self, r#type: GameInfoType) {
@@ -247,12 +247,12 @@ impl Hud {
                 if self.num_blinks < 3 {
                     playing_state_fragment.color = Some(playing_state_color);
                 } else {
-                    let next_game_info;
-                    if self.maxspeed_reached {
-                        next_game_info = GameInfoType::MaxSpeed;
+                    let next_game_info = if self.maxspeed_reached {
+                        GameInfoType::MaxSpeed
                     } else {
-                        next_game_info = GameInfoType::None;
-                    }
+                        GameInfoType::None
+                    };
+
                     self.reset_animation(next_game_info);
                 }
             }
@@ -285,10 +285,10 @@ impl Hud {
 
     pub fn update_scoring(&mut self, scoring: &Scoring) {
         self.scoring_values.score =
-            HudScoringValues::set_value(self.scoring_values_font, scoring.score);
+            ScoringValues::set_value(self.scoring_values_font, scoring.score);
         if scoring.is_new_maxcombo {
             self.scoring_values.maxcombo =
-                HudScoringValues::set_value(self.scoring_values_font, scoring.maxcombo);
+                ScoringValues::set_value(self.scoring_values_font, scoring.maxcombo);
         }
         /*if scoring.is_new_highscore {
             // TODO only strikethrough?
@@ -391,16 +391,16 @@ pub struct GameInfo {
     instructions: Option<Text>,
 }
 
-struct HudScoringValues {
+struct ScoringValues {
     score: Text,
     maxcombo: Text,
     highscore: Text,
 }
 
-impl HudScoringValues {
+impl ScoringValues {
     // FIXME refactor
     pub fn new(font: Font, highscore: usize) -> Self {
-        HudScoringValues {
+        Self {
             score: Self::set_value(font, 0),
             maxcombo: Self::set_value(font, 0),
             highscore: Self::set_value(font, highscore),
