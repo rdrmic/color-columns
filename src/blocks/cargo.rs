@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter, Result};
 
 use ggez::{graphics::Rect, Context};
 
-use crate::config::{BLOCK_SIZE, GAME_ARENA_COLUMNS, GAME_ARENA_RECT};
+use crate::constants::{BLOCK_SIZE, GAME_ARENA_COLUMNS, GAME_ARENA_RECT};
 
 use super::{pile::Pile, Block};
 

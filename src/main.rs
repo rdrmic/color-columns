@@ -20,7 +20,7 @@ use ggez::{
     GameResult,
 };
 
-use config::{FPS, WINDOW_HEIGHT, WINDOW_TITLE, WINDOW_WIDTH};
+use constants::{FPS, WINDOW_HEIGHT, WINDOW_TITLE, WINDOW_WIDTH};
 
 use crate::{
     input::Event,
@@ -32,7 +32,7 @@ use crate::{
 };
 
 mod blocks;
-mod config;
+mod constants;
 mod fonts;
 mod input;
 mod navigation_instructions;

@@ -16,7 +16,7 @@ use rand::Rng;
 use ggez::graphics::{self, mint::Point2, Color, DrawMode, DrawParam, Mesh, Rect};
 use ggez::Context;
 
-use crate::config::{
+use crate::constants::{
     BLOCK_COLOR_BLUE, BLOCK_COLOR_CYAN, BLOCK_COLOR_GREEN, BLOCK_COLOR_MAGENTA, BLOCK_COLOR_RED,
     BLOCK_COLOR_YELLOW, BLOCK_SIZE, GAME_ARENA_COLUMNS, GAME_ARENA_MARGIN_LEFT, GAME_ARENA_RECT,
 };

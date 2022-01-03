@@ -3,7 +3,7 @@
 use std::fs::{self, File};
 use std::io::{Read, Write};
 
-use crate::config::APP_NAME;
+use crate::constants::APP_NAME;
 
 /*******************************************************************************
 **** SCORING

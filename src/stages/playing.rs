@@ -11,7 +11,7 @@ use crate::blocks::cargo::Cargo;
 use crate::blocks::matches::Matching;
 use crate::blocks::pile::Pile;
 use crate::blocks::{Block, Factory};
-use crate::config::{
+use crate::constants::{
     COLOR_GRAY, GAME_ARENA_RECT, NUM_DESCENDED_CARGOES_GAMEPLAY_ACCELERATION,
     NUM_TICKS_FOR_PAUSED_BLOCKS_SHUFFLE, NUM_TICKS_GAMEPLAY_ACCELERATION_LIMIT,
     STARTING_NUM_TICKS_FOR_CARGO_DESCENT,

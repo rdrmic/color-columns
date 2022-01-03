@@ -8,7 +8,7 @@ use ggez::{
 
 use crate::{
     blocks::idx_pair_to_center_point_of_block,
-    config::{COLOR_LIGHT_GRAY, NUM_TICKS_SEQUENCE_FOR_MATCHES_REMOVAL},
+    constants::{COLOR_LIGHT_GRAY, NUM_TICKS_SEQUENCE_FOR_MATCHES_REMOVAL},
     stages::playing::Direction,
 };
 

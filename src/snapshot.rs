@@ -6,7 +6,7 @@ use ggez::mint::Point2;
 
 use crate::blocks::pile::Pile;
 use crate::blocks::{idx_to_position, Block, Factory};
-use crate::config::{
+use crate::constants::{
     BLOCK_SIZE, GAME_ARENA_COLUMNS, GAME_ARENA_RECT, GAME_ARENA_ROWS, NO_BLOCK_CODE,
 };
 

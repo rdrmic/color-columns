@@ -5,7 +5,7 @@ use ggez::{
 use glam::Vec2;
 
 use crate::{
-    config::{
+    constants::{
         COLOR_LIGHT_GRAY, CREDITS_CHAR_SCALE, CREDITS_TEXT_POSITION, GO_BACK_LABEL_POSITION,
         HOWTOPLAY_AND_CREDITS_AREA_WIDTH,
     },

@@ -7,7 +7,7 @@ use std::{
 use ggez::Context;
 
 use crate::{
-    config::{BLOCK_SIZE, GAME_ARENA_COLUMNS, GAME_ARENA_RECT, GAME_ARENA_ROWS, NO_BLOCK_CODE},
+    constants::{BLOCK_SIZE, GAME_ARENA_COLUMNS, GAME_ARENA_RECT, GAME_ARENA_ROWS, NO_BLOCK_CODE},
     stages::playing::Direction,
 };
 

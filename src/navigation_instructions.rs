@@ -1,6 +1,6 @@
 use ggez::graphics::{Color, Font, PxScale, Text, TextFragment};
 
-use crate::config::{COLOR_GRAY, NAVIGATION_INSTRUCTIONS_CHAR_SCALE};
+use crate::constants::{COLOR_GRAY, NAVIGATION_INSTRUCTIONS_CHAR_SCALE};
 
 /*******************************************************************************
 **** NAVIGATION INSTRUCTIONS
