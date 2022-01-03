@@ -60,7 +60,8 @@ fn main() {
             .add_resource_path(resource_dir)
             .build()
             .unwrap();
-    // SET WINDOW POSITION  // TODO
+    // SET WINDOW POSITION
+    // TODO
     //graphics::set_window_position(&ctx, PhysicalPosition::new(1000.0, 20.0)).unwrap();
 
     let window = graphics::window(&ctx);
