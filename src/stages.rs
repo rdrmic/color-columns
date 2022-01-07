@@ -1,4 +1,4 @@
-use ggez::Context;
+use ggez::{Context, GameResult};
 
 use crate::input::Event;
 
@@ -17,5 +17,5 @@ pub enum Stage {
 
 pub trait StageTrait {
     fn update(&mut self, user_input: Event) -> Option<Stage>;
-    fn draw(&mut self, ctx: &mut Context);
+    fn draw(&mut self, ctx: &mut Context) -> GameResult<()>;
 }

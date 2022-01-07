@@ -1,6 +1,6 @@
 use ggez::{
     graphics::{self, Align, DrawParam, PxScale, Text, TextFragment},
-    Context,
+    Context, GameResult,
 };
 use glam::Vec2;
 
@@ -106,7 +106,7 @@ impl StageTrait for HowToPlay {
         Some(Stage::HowToPlay)
     }
 
-    fn draw(&mut self, ctx: &mut Context) {
+    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::queue_text(
             ctx,
             &self.go_back_instruction,
@@ -148,5 +148,7 @@ impl StageTrait for HowToPlay {
             graphics::FilterMode::Linear,
         )
         .unwrap();
+
+        Ok(())
     }
 }

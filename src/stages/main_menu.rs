@@ -1,6 +1,6 @@
 use ggez::graphics::{Align, Color, DrawParam, Font, PxScale, Text, TextFragment};
 use ggez::mint::Point2;
-use ggez::{graphics, Context};
+use ggez::{graphics, Context, GameResult};
 use glam::Vec2;
 
 use super::StageTrait;
@@ -234,7 +234,7 @@ impl StageTrait for MainMenu {
         Some(Stage::MainMenu)
     }
 
-    fn draw(&mut self, ctx: &mut Context) {
+    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::queue_text(
             ctx,
             &self.item_labels.play,
@@ -264,5 +264,8 @@ impl StageTrait for MainMenu {
 
         self.selected_item_blocks[0].draw(ctx);
         self.selected_item_blocks[1].draw(ctx);
+
+        Ok(())
+        //Err(GameError::CustomError("habab!".to_string()))
     }
 }
