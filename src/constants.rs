@@ -15,12 +15,12 @@ pub const WINDOW_HEIGHT: f32 = 600.0;
 // COLORS
 pub const COLOR_GRAY: Color = Color::new(1.0, 1.0, 1.0, 0.2);
 pub const COLOR_LIGHT_GRAY: Color = Color::new(1.0, 1.0, 1.0, 0.4);
-pub const COLOR_RED: Color = Color::new(255.0 / 255.0, 0.0, 0.0, 1.0);
-pub const COLOR_GREEN: Color = Color::new(0.0, 200.0 / 255.0, 0.0, 1.0);
-pub const COLOR_BLUE: Color = Color::new(0.0, 0.0, 240.0 / 255.0, 1.0);
-pub const COLOR_ORANGE: Color = Color::new(1.0, 116.0 / 255.0, 0.0, 1.0);
-pub const COLOR_MAGENTA: Color = Color::new(200.0 / 255.0, 0.0, 164.0 / 255.0, 1.0);
-pub const COLOR_YELLOW: Color = Color::new(1.0, 212.0 / 255.0, 0.0, 1.0);
+pub const COLOR_RED: Color = Color::new(1.0, 0.0, 0.0, 1.0);
+pub const COLOR_GREEN: Color = Color::new(0.0, 0.784, 0.0, 1.0);
+pub const COLOR_BLUE: Color = Color::new(0.0, 0.0, 0.941, 1.0);
+pub const COLOR_ORANGE: Color = Color::new(1.0, 0.65, 0.0, 1.0);
+pub const COLOR_MAGENTA: Color = Color::new(0.784, 0.0, 0.643, 1.0);
+pub const COLOR_YELLOW: Color = Color::new(1.0, 0.831, 0.0, 1.0);
 
 // BLOCKS
 pub const BLOCK_SIZE: f32 = 23.0;
