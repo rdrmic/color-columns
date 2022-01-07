@@ -13,16 +13,14 @@ pub const WINDOW_WIDTH: f32 = 400.0;
 pub const WINDOW_HEIGHT: f32 = 600.0;
 
 // COLORS
-pub const BLOCK_COLOR_ALPHA: f32 = 0.75;
-// TODO graphics::Color::from((255, 255, 255, 128)) ?
 pub const COLOR_GRAY: Color = Color::new(1.0, 1.0, 1.0, 0.2);
 pub const COLOR_LIGHT_GRAY: Color = Color::new(1.0, 1.0, 1.0, 0.4);
-pub const COLOR_RED: Color = Color::new(1.0, 0.0, 0.0, BLOCK_COLOR_ALPHA);
-pub const COLOR_GREEN: Color = Color::new(0.0, 1.0, 0.0, BLOCK_COLOR_ALPHA);
-pub const COLOR_BLUE: Color = Color::new(0.0, 0.0, 1.0, BLOCK_COLOR_ALPHA);
-pub const COLOR_CYAN: Color = Color::new(0.0, 1.0, 1.0, BLOCK_COLOR_ALPHA);
-pub const COLOR_MAGENTA: Color = Color::new(1.0, 0.0, 1.0, BLOCK_COLOR_ALPHA);
-pub const COLOR_YELLOW: Color = Color::new(1.0, 1.0, 0.0, BLOCK_COLOR_ALPHA);
+pub const COLOR_RED: Color = Color::new(255.0 / 255.0, 0.0, 0.0, 1.0);
+pub const COLOR_GREEN: Color = Color::new(0.0, 200.0 / 255.0, 0.0, 1.0);
+pub const COLOR_BLUE: Color = Color::new(0.0, 0.0, 240.0 / 255.0, 1.0);
+pub const COLOR_ORANGE: Color = Color::new(1.0, 116.0 / 255.0, 0.0, 1.0);
+pub const COLOR_MAGENTA: Color = Color::new(200.0 / 255.0, 0.0, 164.0 / 255.0, 1.0);
+pub const COLOR_YELLOW: Color = Color::new(1.0, 212.0 / 255.0, 0.0, 1.0);
 
 // BLOCKS
 pub const BLOCK_SIZE: f32 = 23.0;
@@ -41,7 +39,7 @@ pub const BLOCK_COLOR_BLUE: BlockColor = BlockColor {
 };
 pub const BLOCK_COLOR_CYAN: BlockColor = BlockColor {
     code: 'C',
-    color: COLOR_CYAN,
+    color: COLOR_ORANGE,
 };
 pub const BLOCK_COLOR_MAGENTA: BlockColor = BlockColor {
     code: 'M',
@@ -58,6 +56,7 @@ pub const MAIN_MENU_ITEM_AREA_X: f32 = 50.0;
 pub const MAIN_MENU_ITEM_AREA_WIDTH: f32 = 300.0;
 pub const MAIN_MENU_ITEM_AREA_CENTER: f32 = MAIN_MENU_ITEM_AREA_X + MAIN_MENU_ITEM_AREA_WIDTH / 2.0;
 pub const MAIN_MENU_SELECTED_ITEM_BLOCK_SIZE: f32 = 18.0;
+pub const MAIN_MENU_SELECTED_ITEM_BLOCK_FADE_IN_TRESHOLD: f32 = 0.75;
 pub const MAIN_MENU_SELECTED_ITEM_BLOCK_MARGIN_X: f32 = MAIN_MENU_SELECTED_ITEM_BLOCK_SIZE * 0.725;
 pub const MAIN_MENU_SELECTED_ITEM_BLOCK_MARGIN_Y: f32 = 6.0;
 pub const MAIN_MENU_ITEM_DELTA_Y: f32 = 125.0;
@@ -140,5 +139,5 @@ pub const FPS: u32 = 60;
 pub const STARTING_NUM_TICKS_FOR_CARGO_DESCENT: usize = 45;
 pub const NUM_DESCENDED_CARGOES_GAMEPLAY_ACCELERATION: usize = 9;
 pub const NUM_TICKS_GAMEPLAY_ACCELERATION_LIMIT: usize = 18;
-pub const NUM_TICKS_SEQUENCE_FOR_MATCHES_REMOVAL: [usize; 5] = [10, 10, 10, 10, 10];
+pub const NUM_TICKS_SEQUENCE_FOR_MATCHES_REMOVAL: [usize; 4] = [12, 11, 11, 24];
 pub const NUM_TICKS_FOR_PAUSED_BLOCKS_SHUFFLE: usize = 8;

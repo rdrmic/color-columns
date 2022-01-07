@@ -7,7 +7,7 @@ use ggez::{
 
 use crate::{
     constants::{
-        COLOR_BLUE, COLOR_CYAN, COLOR_GREEN, COLOR_LIGHT_GRAY, COLOR_RED, COLOR_YELLOW,
+        COLOR_BLUE, COLOR_GREEN, COLOR_LIGHT_GRAY, COLOR_ORANGE, COLOR_RED, COLOR_YELLOW,
         HUD_HIGHSCORE_POSITION, HUD_LABEL_HIGHSCORE_POSITION, HUD_LABEL_INSTRUCTIONS_POSITION,
         HUD_LABEL_MAXCOMBO_POSITION, HUD_LABEL_PLAYING_STATE_CHAR_SCALE,
         HUD_LABEL_PLAYING_STATE_POSITION, HUD_LABEL_SCORE_POSITION, HUD_LABEL_SCORING_CHAR_SCALE,
@@ -52,7 +52,7 @@ impl HudLabels {
             game_info_playing_state_ready: Self::create_playing_state_label(
                 font_extra_bold,
                 "Ready...",
-                COLOR_YELLOW,
+                COLOR_ORANGE,
             ),
             game_info_playing_state_go: Self::create_playing_state_label(
                 font_extra_bold,
@@ -67,7 +67,7 @@ impl HudLabels {
             game_info_playing_state_maxspeed: Self::create_playing_state_label(
                 font_extra_bold,
                 "Max speed!",
-                COLOR_CYAN,
+                COLOR_YELLOW,
             ),
             game_info_playing_state_pause: Self::create_playing_state_label(
                 font_extra_bold,

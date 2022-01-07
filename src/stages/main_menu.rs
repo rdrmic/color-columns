@@ -6,12 +6,12 @@ use glam::Vec2;
 use super::StageTrait;
 use crate::blocks::Block;
 use crate::constants::{
-    BLOCK_COLOR_ALPHA, BLOCK_COLOR_BLUE, BLOCK_COLOR_GREEN, BLOCK_COLOR_YELLOW, COLOR_BLUE,
-    COLOR_GREEN, COLOR_YELLOW, MAIN_MENU_ITEMS_Y_POSITIONS, MAIN_MENU_ITEM_AREA_CENTER,
-    MAIN_MENU_ITEM_AREA_WIDTH, MAIN_MENU_ITEM_AREA_X, MAIN_MENU_ITEM_CHAR_SCALE,
+    BLOCK_COLOR_BLUE, BLOCK_COLOR_GREEN, BLOCK_COLOR_YELLOW, COLOR_BLUE, COLOR_GREEN, COLOR_YELLOW,
+    MAIN_MENU_ITEMS_Y_POSITIONS, MAIN_MENU_ITEM_AREA_CENTER, MAIN_MENU_ITEM_AREA_WIDTH,
+    MAIN_MENU_ITEM_AREA_X, MAIN_MENU_ITEM_CHAR_SCALE,
     MAIN_MENU_SELECTED_ITEM_BLOCK_ALPHA_INCREMENT_ACCELERATION,
-    MAIN_MENU_SELECTED_ITEM_BLOCK_MARGIN_X, MAIN_MENU_SELECTED_ITEM_BLOCK_MARGIN_Y,
-    MAIN_MENU_SELECTED_ITEM_BLOCK_SIZE,
+    MAIN_MENU_SELECTED_ITEM_BLOCK_FADE_IN_TRESHOLD, MAIN_MENU_SELECTED_ITEM_BLOCK_MARGIN_X,
+    MAIN_MENU_SELECTED_ITEM_BLOCK_MARGIN_Y, MAIN_MENU_SELECTED_ITEM_BLOCK_SIZE,
 };
 use crate::input::Event;
 use crate::resources::Resources;
@@ -222,7 +222,7 @@ impl StageTrait for MainMenu {
         // SELECTED ITEM BLOCKS FADING-IN ANIMATION
         self.selected_item_blocks[0].color.color.a = self.selected_item_blocks_alpha;
         self.selected_item_blocks[1].color.color.a = self.selected_item_blocks_alpha;
-        if self.selected_item_blocks_alpha >= BLOCK_COLOR_ALPHA {
+        if self.selected_item_blocks_alpha >= MAIN_MENU_SELECTED_ITEM_BLOCK_FADE_IN_TRESHOLD {
             self.selected_item_blocks_alpha = 0.0;
             self.selected_item_blocks_alpha_increment = 0.0;
         } else {
