@@ -1,7 +1,7 @@
 use std::{env, mem};
 
 use ggez::graphics::{self, Color, DrawMode, DrawParam, Mesh, Rect, StrokeOptions};
-use ggez::Context;
+use ggez::{Context, GameResult};
 
 use self::hud::{GameInfo, GameInfoType};
 use self::scoring::Scoring;
@@ -487,6 +487,16 @@ impl StageTrait for Playing {
         /*if let None = self.playing_state {
             self.new_game();
         }*/
+        if let Event::SaveScoreOnQuit = input_event {
+            if let Some(
+                PlayingState::DescendingCargo | PlayingState::HandlingMatches | PlayingState::Pause,
+            ) = self.playing_state
+            {
+                self.scoring.save_highscore();
+                return None;
+            }
+        }
+
         match self.playing_state {
             None => self.new_game(),
             Some(PlayingState::Ready) => self.update_state_ready(&input_event),
@@ -508,7 +518,7 @@ impl StageTrait for Playing {
         Some(Stage::Playing)
     }
 
-    fn draw(&mut self, ctx: &mut Context) {
+    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         self.hud.draw(ctx);
         self.game_arena.draw(ctx);
 
@@ -528,5 +538,7 @@ impl StageTrait for Playing {
                 matching.draw(ctx);
             }
         }
+
+        Ok(())
     }
 }

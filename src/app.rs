@@ -2,7 +2,7 @@ use std::{env, mem, path::PathBuf};
 
 use ggez::{
     conf::WindowMode,
-    event::{self, EventHandler, KeyCode, KeyMods},
+    event::{self, ErrorOrigin, EventHandler, KeyCode, KeyMods},
     graphics::{self, Color},
     //winit::dpi::PhysicalPosition,
     Context,
@@ -31,6 +31,7 @@ pub fn run() {
         PathBuf::from("./resources")
     };
     // CREATE GAME CONTEXT
+    #[allow(clippy::unwrap_used)]
     let (mut ctx, event_loop) =
         ContextBuilder::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_AUTHORS"))
             .window_mode(
@@ -102,16 +103,10 @@ impl EventHandler<GameError> for App {
         while ggez::timer::check_update_time(ctx, FPS) {
             let user_input = mem::take(&mut self.input_event);
             if let Some(stage_from_update) = self.get_currrent_stage().update(user_input) {
-                /*if let Stage::MainMenu = self.current_stage {
-                    if let Stage::Playing = stage_from_update {
-                        //let new_playing_stage = &mut self.stages[Stage::Playing as usize] as Playing;
-                        //println!("{:?}", (&mut self.stages[Stage::Playing as usize] as Playing).matching);
-                        //
-                    }
-                }*/
                 self.current_stage = stage_from_update;
             } else {
                 event::quit(ctx);
+                self.quit_event(ctx);
             }
         }
         Ok(())
@@ -119,7 +114,7 @@ impl EventHandler<GameError> for App {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx, Color::BLACK);
-        self.get_currrent_stage().draw(ctx);
+        self.get_currrent_stage().draw(ctx)?;
         graphics::present(ctx)
 
         // TODO timer::yield_now() needed?
@@ -142,11 +137,6 @@ impl EventHandler<GameError> for App {
             _repeat
         );*/
         self.input_event = Event::map_input(keycode);
-
-        // FIXME remove
-        /*if keycode == KeyCode::Escape {
-            event::quit(_ctx);
-        }*/
     }
 
     fn focus_event(&mut self, _ctx: &mut Context, gained: bool) {
@@ -155,18 +145,23 @@ impl EventHandler<GameError> for App {
         }
     }
 
-    /*fn quit_event(&mut self, _ctx: &mut Context) -> bool {
-        println!("*** BYE...");
+    fn quit_event(&mut self, _ctx: &mut Context) -> bool {
         if let Stage::Playing = self.current_stage {
-            println!(" // ... from Playing");
-            self.input_event = InputEvent::Quit;
-            return true
+            self.get_currrent_stage().update(Event::SaveScoreOnQuit);
         }
         false
-    }*/
+    }
 
-    // TODO
-    /*fn on_error(&mut self, _ctx: &mut Context, _origin: event::ErrorOrigin, _e: GameError) -> bool {
-
-    }*/
+    fn on_error(
+        &mut self,
+        _ctx: &mut Context,
+        error_origin: ErrorOrigin,
+        error: GameError,
+    ) -> bool {
+        println!("\n---------------------------");
+        println!("_origin: {:?}", error_origin);
+        println!("_e: {:?}", error);
+        println!("---------------------------\n");
+        true
+    }
 }

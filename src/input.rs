@@ -6,6 +6,7 @@ pub enum Event {
     Enter,
     Escape,
     LostFocus,
+    SaveScoreOnQuit,
     Right,
     Left,
     Up,
