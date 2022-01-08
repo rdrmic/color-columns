@@ -48,7 +48,7 @@ pub fn run() {
 
     let window = graphics::window(&ctx);
     //window.set_outer_position(PhysicalPosition::new(350.0, 50.0));
-    window.set_cursor_visible(false);
+    //window.set_cursor_visible(false);
     //window.set_title(title)
     //window.set_window_icon(window_icon)
     window.set_visible(true);
