@@ -6,7 +6,7 @@ use glam::Vec2;
 
 use crate::{
     constants::{
-        COLOR_GREEN, COLOR_RED, GO_BACK_LABEL_POSITION, HOWTOPLAY_AND_CREDITS_AREA_WIDTH,
+        COLOR_GREEN, COLOR_RED, GO_BACK_LABEL_POSITION, HOWTOPLAY_AND_ABOUT_AREA_WIDTH,
         HOWTOPLAY_CONTROLS_CHAR_SCALE, HOWTOPLAY_CONTROLS_LEFTSIDE_TEXT_POSITION_X,
         HOWTOPLAY_CONTROLS_RIGHTSIDE_TEXT_POSITION_X, HOWTOPLAY_CONTROLS_TEXT_POSITION_Y,
         HOWTOPLAY_SCORING_CHAR_SCALE, HOWTOPLAY_SCORING_RULES_TEXT_POSITION,
@@ -42,7 +42,7 @@ impl HowToPlay {
             scale: Some(PxScale::from(HOWTOPLAY_CONTROLS_CHAR_SCALE)),
         });
         controls_leftside.set_bounds(
-            Vec2::new(HOWTOPLAY_AND_CREDITS_AREA_WIDTH, f32::INFINITY),
+            Vec2::new(HOWTOPLAY_AND_ABOUT_AREA_WIDTH, f32::INFINITY),
             Align::Left,
         );
 
@@ -60,7 +60,7 @@ impl HowToPlay {
             scale: Some(PxScale::from(HOWTOPLAY_CONTROLS_CHAR_SCALE)),
         });
         controls_rightside.set_bounds(
-            Vec2::new(HOWTOPLAY_AND_CREDITS_AREA_WIDTH, f32::INFINITY),
+            Vec2::new(HOWTOPLAY_AND_ABOUT_AREA_WIDTH, f32::INFINITY),
             Align::Left,
         );
 
@@ -81,7 +81,7 @@ impl HowToPlay {
             scale: Some(PxScale::from(HOWTOPLAY_SCORING_CHAR_SCALE)),
         });
         scoring_rules.set_bounds(
-            Vec2::new(HOWTOPLAY_AND_CREDITS_AREA_WIDTH, f32::INFINITY),
+            Vec2::new(HOWTOPLAY_AND_ABOUT_AREA_WIDTH, f32::INFINITY),
             Align::Left,
         );
 

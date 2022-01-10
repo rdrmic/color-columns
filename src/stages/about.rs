@@ -6,8 +6,8 @@ use glam::Vec2;
 
 use crate::{
     constants::{
-        COLOR_LIGHT_GRAY, CREDITS_CHAR_SCALE, CREDITS_TEXT_POSITION, GO_BACK_LABEL_POSITION,
-        HOWTOPLAY_AND_CREDITS_AREA_WIDTH,
+        COLOR_LIGHT_GRAY, ABOUT_CHAR_SCALE, ABOUT_TEXT_POSITION, GO_BACK_LABEL_POSITION,
+        HOWTOPLAY_AND_ABOUT_AREA_WIDTH,
     },
     input::Event,
     resources::Resources,
@@ -38,10 +38,10 @@ impl About {
             text: text_str.to_string(),
             color: Some(COLOR_LIGHT_GRAY),
             font: Some(font),
-            scale: Some(PxScale::from(CREDITS_CHAR_SCALE)),
+            scale: Some(PxScale::from(ABOUT_CHAR_SCALE)),
         });
         text.set_bounds(
-            Vec2::new(HOWTOPLAY_AND_CREDITS_AREA_WIDTH, f32::INFINITY),
+            Vec2::new(HOWTOPLAY_AND_ABOUT_AREA_WIDTH, f32::INFINITY),
             Align::Left,
         );
 
@@ -74,7 +74,7 @@ impl StageTrait for About {
         graphics::queue_text(
             ctx,
             &self.text,
-            Vec2::new(CREDITS_TEXT_POSITION.0, CREDITS_TEXT_POSITION.1),
+            Vec2::new(ABOUT_TEXT_POSITION.0, ABOUT_TEXT_POSITION.1),
             None,
         );
 
