@@ -482,7 +482,7 @@ impl Playing {
 }
 
 impl StageTrait for Playing {
-    fn update(&mut self, input_event: Event) -> Option<Stage> {
+    fn update(&mut self, input_event: Event) -> GameResult<Option<Stage>> {
         //InputEvent::__print(&input_event);
         /*if let None = self.playing_state {
             self.new_game();
@@ -493,7 +493,7 @@ impl StageTrait for Playing {
             ) = self.playing_state
             {
                 self.scoring.save_highscore();
-                return None;
+                return Ok(None);
             }
         }
 
@@ -507,7 +507,7 @@ impl StageTrait for Playing {
             Some(PlayingState::QuittingToMainMenu) => {
                 //println!("// PlayingState::QuittingToMainMenu");
                 self.playing_state = None;
-                return Some(Stage::MainMenu);
+                return Ok(Some(Stage::MainMenu));
             }
         };
         if let Some(PlayingState::DescendingCargo | PlayingState::HandlingMatches) =
@@ -515,7 +515,7 @@ impl StageTrait for Playing {
         {
             self.hud.update_game_info();
         }
-        Some(Stage::Playing)
+        Ok(Some(Stage::Playing))
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {

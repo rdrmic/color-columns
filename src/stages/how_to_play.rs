@@ -98,12 +98,12 @@ impl HowToPlay {
 }
 
 impl StageTrait for HowToPlay {
-    fn update(&mut self, input_event: Event) -> Option<Stage> {
+    fn update(&mut self, input_event: Event) -> GameResult<Option<Stage>> {
         if let Event::Escape = input_event {
             //println!("### Stage::HowToPlay -> Stage::MainMenu");
-            return Some(Stage::MainMenu);
+            return Ok(Some(Stage::MainMenu));
         }
-        Some(Stage::HowToPlay)
+        Ok(Some(Stage::HowToPlay))
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {

@@ -16,6 +16,6 @@ pub enum Stage {
 }
 
 pub trait StageTrait {
-    fn update(&mut self, user_input: Event) -> Option<Stage>;
+    fn update(&mut self, user_input: Event) -> GameResult<Option<Stage>>;
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()>;
 }

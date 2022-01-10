@@ -56,12 +56,12 @@ impl Credits {
 }
 
 impl StageTrait for Credits {
-    fn update(&mut self, input_event: Event) -> Option<Stage> {
+    fn update(&mut self, input_event: Event) -> GameResult<Option<Stage>> {
         if let Event::Escape = input_event {
             //println!("### Stage::Credits -> Stage::MainMenu");
-            return Some(Stage::MainMenu);
+            return Ok(Some(Stage::MainMenu));
         }
-        Some(Stage::Credits)
+        Ok(Some(Stage::Credits))
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {

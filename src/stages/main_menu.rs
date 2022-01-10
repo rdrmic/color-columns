@@ -186,7 +186,7 @@ impl MainMenu {
 }
 
 impl StageTrait for MainMenu {
-    fn update(&mut self, input_event: Event) -> Option<Stage> {
+    fn update(&mut self, input_event: Event) -> GameResult<Option<Stage>> {
         let previous_selected_item_idx = self.selected_item_idx;
         match input_event {
             Event::Down => {
@@ -204,11 +204,11 @@ impl StageTrait for MainMenu {
             Event::Enter => {
                 let selected_stage = Self::ITEMS[self.selected_item_idx];
                 //println!("### Stage::MainMenu -> Stage::{:?}", selected_stage);
-                return Some(selected_stage);
+                return Ok(Some(selected_stage));
             }
             Event::Escape => {
                 //println!("### Stage::MainMenu -> QUIT");
-                return None;
+                return Ok(None);
             }
             _ => (),
         }
@@ -231,7 +231,7 @@ impl StageTrait for MainMenu {
             self.selected_item_blocks_alpha += self.selected_item_blocks_alpha_increment;
         }
 
-        Some(Stage::MainMenu)
+        Ok(Some(Stage::MainMenu))
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
@@ -266,6 +266,5 @@ impl StageTrait for MainMenu {
         self.selected_item_blocks[1].draw(ctx);
 
         Ok(())
-        //Err(GameError::CustomError("habab!".to_string()))
     }
 }
