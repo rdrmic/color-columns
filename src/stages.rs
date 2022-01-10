@@ -2,7 +2,7 @@ use ggez::{Context, GameResult};
 
 use crate::input::Event;
 
-pub mod credits;
+pub mod about;
 pub mod how_to_play;
 pub mod main_menu;
 pub mod playing;
@@ -12,7 +12,7 @@ pub enum Stage {
     MainMenu,
     Playing,
     HowToPlay,
-    Credits,
+    About,
 }
 
 pub trait StageTrait {

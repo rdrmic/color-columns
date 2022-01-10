@@ -24,7 +24,7 @@ use crate::{
     input::Event,
     resources::Resources,
     stages::{
-        credits::Credits, how_to_play::HowToPlay, main_menu::MainMenu, playing::Playing, Stage,
+        about::About, how_to_play::HowToPlay, main_menu::MainMenu, playing::Playing, Stage,
         StageTrait,
     },
 };
@@ -134,7 +134,7 @@ impl App {
                 Box::new(MainMenu::new(&resources, ctx)),
                 Box::new(Playing::new(&resources)),
                 Box::new(HowToPlay::new(&resources)),
-                Box::new(Credits::new(&resources)),
+                Box::new(About::new(&resources)),
             ],
             current_stage: initial_stage,
             input_event: Event::None,
@@ -146,7 +146,7 @@ impl App {
             Stage::MainMenu => &mut self.stages[Stage::MainMenu as usize],
             Stage::Playing => &mut self.stages[Stage::Playing as usize],
             Stage::HowToPlay => &mut self.stages[Stage::HowToPlay as usize],
-            Stage::Credits => &mut self.stages[Stage::Credits as usize],
+            Stage::About => &mut self.stages[Stage::About as usize],
         }
     }
 }

@@ -23,7 +23,7 @@ use crate::stages::Stage;
 struct ItemLabels {
     play: Text,
     how_to_play: Text,
-    credits: Text,
+    about: Text,
 }
 
 impl ItemLabels {
@@ -31,7 +31,7 @@ impl ItemLabels {
         Self {
             play: Self::create_item_label(font, "PLAY", COLOR_GREEN),
             how_to_play: Self::create_item_label(font, "HOW TO PLAY", COLOR_YELLOW),
-            credits: Self::create_item_label(font, "CREDITS", COLOR_BLUE),
+            about: Self::create_item_label(font, "ABOUT", COLOR_BLUE),
         }
     }
 
@@ -56,7 +56,7 @@ impl ItemLabels {
 struct SelectedItemBlocksPositions {
     play: [Point2<f32>; 2],
     how_to_play: [Point2<f32>; 2],
-    credits: [Point2<f32>; 2],
+    about: [Point2<f32>; 2],
 }
 
 impl SelectedItemBlocksPositions {
@@ -65,7 +65,7 @@ impl SelectedItemBlocksPositions {
         Self {
             play: positions[0],
             how_to_play: positions[1],
-            credits: positions[2],
+            about: positions[2],
         }
     }
 
@@ -113,8 +113,8 @@ impl SelectedItemIndicator {
                 blocks_positions = self.blocks_positions.how_to_play;
                 color = BLOCK_COLOR_YELLOW;
             }
-            Stage::Credits => {
-                blocks_positions = self.blocks_positions.credits;
+            Stage::About => {
+                blocks_positions = self.blocks_positions.about;
                 color = BLOCK_COLOR_BLUE;
             }
             _ => {
@@ -151,7 +151,7 @@ pub struct MainMenu {
 }
 
 impl MainMenu {
-    pub const ITEMS: [Stage; 3] = [Stage::Playing, Stage::HowToPlay, Stage::Credits];
+    pub const ITEMS: [Stage; 3] = [Stage::Playing, Stage::HowToPlay, Stage::About];
 
     pub fn new(resources: &Resources, ctx: &mut Context) -> Self {
         let font = resources.get_fonts().get_extra_bold();
@@ -160,7 +160,7 @@ impl MainMenu {
         let item_widths = [
             item_labels.play.dimensions(ctx).w,
             item_labels.how_to_play.dimensions(ctx).w,
-            item_labels.credits.dimensions(ctx).w,
+            item_labels.about.dimensions(ctx).w,
         ];
         let selected_item_indicator = SelectedItemIndicator::new(item_widths);
 
@@ -249,7 +249,7 @@ impl StageTrait for MainMenu {
         );
         graphics::queue_text(
             ctx,
-            &self.item_labels.credits,
+            &self.item_labels.about,
             Vec2::new(MAIN_MENU_ITEM_AREA_X, MAIN_MENU_ITEMS_Y_POSITIONS[2]),
             None,
         );

@@ -15,12 +15,12 @@ use crate::{
 
 use super::{Stage, StageTrait};
 
-pub struct Credits {
+pub struct About {
     go_back_instruction: Text,
     text: Text,
 }
 
-impl Credits {
+impl About {
     pub fn new(resources: &Resources) -> Self {
         let font = resources.get_fonts().get_semi_bold();
 
@@ -55,13 +55,13 @@ impl Credits {
     }
 }
 
-impl StageTrait for Credits {
+impl StageTrait for About {
     fn update(&mut self, input_event: Event) -> GameResult<Option<Stage>> {
         if let Event::Escape = input_event {
-            //println!("### Stage::Credits -> Stage::MainMenu");
+            //println!("### Stage::About -> Stage::MainMenu");
             return Ok(Some(Stage::MainMenu));
         }
-        Ok(Some(Stage::Credits))
+        Ok(Some(Stage::About))
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {

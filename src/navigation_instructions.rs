@@ -26,7 +26,7 @@ impl NavigationInstructions {
                 .create_label("'Enter' to continue\n'Esc' to exit to main menu"),
             playing_gameover: label_factory
                 .create_label("'Enter' for a new game\n'Esc' to main menu"),
-            // HOW TO PLAY & CREDITS
+            // HOW TO PLAY & ABOUT
             go_back: label_factory.create_label("'Esc' to main menu"),
         }
     }
