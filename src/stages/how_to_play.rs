@@ -1,14 +1,17 @@
 use ggez::{
     graphics::{self, Align, DrawParam, PxScale, Text, TextFragment},
+    mint::Point2,
     Context, GameResult,
 };
 use glam::Vec2;
 
 use crate::{
     constants::{
-        COLOR_GREEN, COLOR_RED, GO_BACK_LABEL_POSITION, HOWTOPLAY_AND_ABOUT_AREA_WIDTH,
+        COLOR_GRAY, COLOR_GREEN, COLOR_RED, GO_BACK_LABEL_POSITION, HOWTOPLAY_AND_ABOUT_AREA_WIDTH,
         HOWTOPLAY_CONTROLS_CHAR_SCALE, HOWTOPLAY_CONTROLS_LEFTSIDE_TEXT_POSITION_X,
         HOWTOPLAY_CONTROLS_RIGHTSIDE_TEXT_POSITION_X, HOWTOPLAY_CONTROLS_TEXT_POSITION_Y,
+        HOWTOPLAY_LINE_DELIMITER_END_POSITION_X, HOWTOPLAY_LINE_DELIMITER_POSITION_Y,
+        HOWTOPLAY_LINE_DELIMITER_START_POSITION_X, HOWTOPLAY_LINE_DELIMITER_WIDTH,
         HOWTOPLAY_SCORING_CHAR_SCALE, HOWTOPLAY_SCORING_RULES_TEXT_POSITION,
     },
     input::Event,
@@ -131,6 +134,24 @@ impl StageTrait for HowToPlay {
             ),
             None,
         );
+
+        let start_point: Point2<f32> = Point2 {
+            x: HOWTOPLAY_LINE_DELIMITER_START_POSITION_X,
+            y: HOWTOPLAY_LINE_DELIMITER_POSITION_Y,
+        };
+        let end_point: Point2<f32> = Point2 {
+            x: HOWTOPLAY_LINE_DELIMITER_END_POSITION_X,
+            y: HOWTOPLAY_LINE_DELIMITER_POSITION_Y,
+        };
+        let separating_line = graphics::Mesh::new_line(
+            ctx,
+            &[start_point, end_point],
+            HOWTOPLAY_LINE_DELIMITER_WIDTH,
+            COLOR_GRAY,
+        )
+        .unwrap();
+        graphics::draw(ctx, &separating_line, DrawParam::default()).unwrap();
+
         graphics::queue_text(
             ctx,
             &self.scoring_rules,
