@@ -6,7 +6,8 @@ use glam::Vec2;
 
 use crate::{
     constants::{
-        COLOR_LIGHT_GRAY, ABOUT_CHAR_SCALE, ABOUT_TEXT_POSITION, GO_BACK_LABEL_POSITION,
+        ABOUT_CHAR_SCALE, ABOUT_TEXT_POSITION, ABOUT_VERSION_AREA_WIDTH, ABOUT_VERSION_CHAR_SCALE,
+        ABOUT_VERSION_POSITION, COLOR_GRAY, COLOR_LIGHT_GRAY, GO_BACK_LABEL_POSITION,
         HOWTOPLAY_AND_ABOUT_AREA_WIDTH,
     },
     input::Event,
@@ -17,14 +18,15 @@ use super::{Stage, StageTrait};
 
 pub struct About {
     go_back_instruction: Text,
-    text: Text,
+    about: Text,
+    version: Text,
 }
 
 impl About {
     pub fn new(resources: &Resources) -> Self {
         let font = resources.get_fonts().get_semi_bold();
 
-        let text_str = "\n\
+        let about_str = "\n\
             This game is a remake of\n\
             various old, \"classic\",\n\
             columns-like games.\n\
@@ -34,15 +36,27 @@ impl About {
             rdrmic@gmail.com\n\
             ( any feedback is welcome :)
         ";
-        let mut text = Text::new(TextFragment {
-            text: text_str.to_string(),
+        let mut about = Text::new(TextFragment {
+            text: about_str.to_string(),
             color: Some(COLOR_LIGHT_GRAY),
             font: Some(font),
             scale: Some(PxScale::from(ABOUT_CHAR_SCALE)),
         });
-        text.set_bounds(
+        about.set_bounds(
             Vec2::new(HOWTOPLAY_AND_ABOUT_AREA_WIDTH, f32::INFINITY),
             Align::Left,
+        );
+
+        let version_str = format!("ver {}", env!("CARGO_PKG_VERSION"));
+        let mut version = Text::new(TextFragment {
+            text: version_str,
+            color: Some(COLOR_GRAY),
+            font: Some(font),
+            scale: Some(PxScale::from(ABOUT_VERSION_CHAR_SCALE)),
+        });
+        version.set_bounds(
+            Vec2::new(ABOUT_VERSION_AREA_WIDTH, f32::INFINITY),
+            Align::Right,
         );
 
         Self {
@@ -50,7 +64,8 @@ impl About {
                 .get_navigation_instructions()
                 .get_go_back()
                 .clone(),
-            text,
+            about,
+            version,
         }
     }
 }
@@ -73,8 +88,14 @@ impl StageTrait for About {
         );
         graphics::queue_text(
             ctx,
-            &self.text,
+            &self.about,
             Vec2::new(ABOUT_TEXT_POSITION.0, ABOUT_TEXT_POSITION.1),
+            None,
+        );
+        graphics::queue_text(
+            ctx,
+            &self.version,
+            Vec2::new(ABOUT_VERSION_POSITION.0, ABOUT_VERSION_POSITION.1),
             None,
         );
 

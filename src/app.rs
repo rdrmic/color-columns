@@ -20,7 +20,7 @@ use ggez::{
 };
 
 use crate::{
-    constants::{FPS, WINDOW_HEIGHT, WINDOW_TITLE, WINDOW_WIDTH},
+    constants::{APP_NAME, FPS, WINDOW_HEIGHT, WINDOW_WIDTH},
     input::Event,
     resources::Resources,
     stages::{
@@ -54,7 +54,7 @@ pub fn run() {
         }
     }
 
-    // SET WINDOW POSITION
+    // SET WINDOW
     // TODO
     //graphics::set_window_position(&ctx, PhysicalPosition::new(1000.0, 20.0)).unwrap();
 
@@ -63,13 +63,9 @@ pub fn run() {
     //window.set_cursor_visible(false);
     //window.set_title(title)
     //window.set_window_icon(window_icon)
-    window.set_visible(true);
-
-    // SET WINDOW TITLE
-    let app_version = env!("CARGO_PKG_VERSION");
-    let window_title = format!("{} {}", WINDOW_TITLE, app_version);
-    graphics::set_window_title(&ctx, &window_title);
+    graphics::set_window_title(&ctx, APP_NAME);
     //graphics::set_window_icon(&mut ctx, Some("")).unwrap();   // TODO
+    window.set_visible(true);
 
     // CREATE APP STATE
     let app = App::new(&mut ctx, Stage::MainMenu);
