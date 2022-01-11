@@ -40,7 +40,7 @@ pub fn run() {
                 .dimensions(WINDOW_WIDTH, WINDOW_HEIGHT)
                 .visible(false),
         )
-        .add_resource_path(resources_dir_path)
+        .add_resource_path(&resources_dir_path)
         .build();
     let (mut ctx, event_loop);
     match ctx_builder_result {
@@ -55,17 +55,10 @@ pub fn run() {
     }
 
     // SET WINDOW
-    // TODO
     //graphics::set_window_position(&ctx, PhysicalPosition::new(1000.0, 20.0)).unwrap();
-
-    let window = graphics::window(&ctx);
-    //window.set_outer_position(PhysicalPosition::new(350.0, 50.0));
-    //window.set_cursor_visible(false);
-    //window.set_title(title)
-    //window.set_window_icon(window_icon)
+    graphics::set_window_icon(&mut ctx, Some("/icon.png")).unwrap();
     graphics::set_window_title(&ctx, APP_NAME);
-    //graphics::set_window_icon(&mut ctx, Some("")).unwrap();   // TODO
-    window.set_visible(true);
+    graphics::window(&ctx).set_visible(true);
 
     // CREATE APP STATE
     let app = App::new(&mut ctx, Stage::MainMenu);
