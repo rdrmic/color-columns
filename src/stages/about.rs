@@ -47,7 +47,7 @@ impl About {
             Align::Left,
         );
 
-        let version_str = format!("ver {}", env!("CARGO_PKG_VERSION"));
+        let version_str = format!("version {}", env!("CARGO_PKG_VERSION"));
         let mut version = Text::new(TextFragment {
             text: version_str,
             color: Some(COLOR_GRAY),
