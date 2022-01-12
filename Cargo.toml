@@ -20,6 +20,7 @@ chrono = "0.4"
 
 [build-dependencies]
 winres = "0.1"
+chrono = "0.4"
 
 [package.metadata.winres]
 FileDescription = "A falling-blocks-type 2D game with a simple but addictive gameplay"

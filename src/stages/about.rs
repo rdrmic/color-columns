@@ -7,7 +7,7 @@ use glam::Vec2;
 use crate::{
     constants::{
         ABOUT_CHAR_SCALE, ABOUT_TEXT_POSITION, ABOUT_VERSION_AREA_WIDTH, ABOUT_VERSION_CHAR_SCALE,
-        ABOUT_VERSION_POSITION, COLOR_GRAY, COLOR_LIGHT_GRAY, GO_BACK_LABEL_POSITION,
+        ABOUT_VERSION_POSITION, BUILD_TIME, COLOR_GRAY, COLOR_LIGHT_GRAY, GO_BACK_LABEL_POSITION,
         HOWTOPLAY_AND_ABOUT_AREA_WIDTH,
     },
     input::Event,
@@ -47,7 +47,7 @@ impl About {
             Align::Left,
         );
 
-        let version_str = format!("version {}", env!("CARGO_PKG_VERSION"));
+        let version_str = format!("version {}\n{}", env!("CARGO_PKG_VERSION"), BUILD_TIME);
         let mut version = Text::new(TextFragment {
             text: version_str,
             color: Some(COLOR_GRAY),
