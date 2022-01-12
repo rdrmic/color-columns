@@ -1,12 +1,26 @@
 [package]
-name = "color_columns"
-version = "0.1.6"
+name = "color-columns"
+description = "A falling-blocks-type 2D game with a simple but addictive gameplay"
+categories = ["games"]
+keywords = ["ggez", "games", "logic-games", "puzzle-games", "falling-blocks"]
+homepage = "https://github.com/rdrmic/color-columns"
 authors = ["Rade Drmić <rdrmic@gmail.com>"]
+license = "MIT"
+repository = "https://github.com/rdrmic/color-columns"
+build = "build.rs"
 edition = "2021"
+version = "0.1.7"
 
 [dependencies]
-ggez = "0.7.0"
-#winit = "0.25.0"
-rand = "0.8.4"
-glam = "0.20.2"
-dirs = "4.0.0"
+ggez = "0.7"
+rand = "0.8"
+glam = "0.20"
+dirs = "4.0"
+chrono = "0.4"
+
+[build-dependencies]
+winres = "0.1"
+
+[package.metadata.winres]
+FileDescription = "A falling-blocks-type 2D game with a simple but addictive gameplay"
+LegalCopyright = "MIT License"

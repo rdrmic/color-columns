@@ -12,11 +12,7 @@ use ggez::{
     conf::WindowMode,
     event::{self, ErrorOrigin, EventHandler, KeyCode, KeyMods},
     graphics::{self, Color},
-    //winit::dpi::PhysicalPosition,
-    Context,
-    ContextBuilder,
-    GameError,
-    GameResult,
+    Context, ContextBuilder, GameError, GameResult,
 };
 
 use crate::{
@@ -55,9 +51,19 @@ pub fn run() {
     }
 
     // SET WINDOW
-    //graphics::set_window_position(&ctx, PhysicalPosition::new(1000.0, 20.0)).unwrap();
-    graphics::set_window_icon(&mut ctx, Some("/icon.png")).unwrap();
+    if let Err(error) = graphics::set_window_icon(&mut ctx, Some("/icon.png")) {
+        log_error("set_window_icon", &error);
+    }
     graphics::set_window_title(&ctx, APP_NAME);
+    // set window position only when developing
+    if cfg!(debug_assertions) {
+        use ggez::winit;
+        if let Err(error) =
+            graphics::set_window_position(&ctx, winit::dpi::PhysicalPosition::new(1350.0, 7.0))
+        {
+            log_error("set_window_position", &error);
+        }
+    }
     graphics::window(&ctx).set_visible(true);
 
     // CREATE APP STATE
@@ -95,7 +101,7 @@ fn log_error(origin: &str, error: &GameError) {
     }
 
     if let Some(mut error_log) = error_log {
-        let error = format!("### ERROR ###\n{}\n\n### ORIGIN ###\n{}\n", error, origin);
+        let error = format!("### ERROR\n{}\n\n### ORIGIN\n{}\n", error, origin);
         let write_result = error_log.write_all(error.as_bytes());
         if write_result.is_err() {
             eprintln!(

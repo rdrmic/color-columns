@@ -3,7 +3,9 @@
 #![warn(clippy::pedantic)]
 #![warn(clippy::nursery)]
 #![warn(clippy::cargo)]
-#![warn(/*clippy::unwrap_used,*/ clippy::todo, clippy::print_stdout)] // from clippy::restriction
+//#![warn(clippy::unwrap_used)]   // FIXME remove!
+//#![warn(clippy::print_stdout)] // FIXME BUG in clippy
+#![warn(/*clippy::unwrap_used, */clippy::todo/*, clippy::print_stdout*/)] // from clippy::restriction
 
 // CONSOLE-FREE EXECUTABLE ON RELEASE BUILDS
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
