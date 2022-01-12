@@ -6,7 +6,7 @@ use crate::blocks::BlockColor;
 
 // APP
 pub const APP_NAME: &str = "Color Columns";
-pub const BUILD_TIME: &str = include!(concat!(env!("CARGO_MANIFEST_DIR"), "/resources/build-time"));
+pub const BUILD_TIME: &str = include!(concat!(env!("OUT_DIR"), "/build-time"));
 
 // WINDOW
 //pub const WINDOW_TITLE: &str = APP_NAME;
@@ -89,10 +89,11 @@ pub const HOWTOPLAY_SCORING_CHAR_SCALE: f32 = 19.5;
 pub const HOWTOPLAY_SCORING_RULES_TEXT_POSITION: (f32, f32) =
     (HOWTOPLAY_AND_ABOUT_TEXT_POSITION_X, 275.0);
 pub const ABOUT_CHAR_SCALE: f32 = 22.0;
-pub const ABOUT_TEXT_POSITION: (f32, f32) = (HOWTOPLAY_AND_ABOUT_TEXT_POSITION_X, 160.2);
-pub const ABOUT_VERSION_CHAR_SCALE: f32 = 17.0;
-pub const ABOUT_VERSION_POSITION: (f32, f32) = (HOWTOPLAY_AND_ABOUT_TEXT_POSITION_X, 470.0);
-pub const ABOUT_VERSION_AREA_WIDTH: f32 = 260.0;
+pub const ABOUT_TEXT_POSITION: (f32, f32) = (HOWTOPLAY_AND_ABOUT_TEXT_POSITION_X, 155.0);
+pub const ABOUT_VERSION_AND_BUILDTIME_CHAR_SCALE: f32 = 17.0;
+pub const ABOUT_VERSION_AND_BUILDTIME_POSITION: (f32, f32) =
+    (HOWTOPLAY_AND_ABOUT_TEXT_POSITION_X, 470.0);
+pub const ABOUT_VERSION_AND_BUILDTIME_AREA_WIDTH: f32 = 260.0;
 
 // HUD
 pub const HUD_LABEL_PLAYING_STATE_CHAR_SCALE: f32 = 40.0;

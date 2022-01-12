@@ -14,14 +14,11 @@ fn set_windows_exe_icon() {
 }
 
 fn write_build_time_to_file() {
-    let file_path = format!(
-        "{}/resources/build-time",
-        env::var("CARGO_MANIFEST_DIR").unwrap()
-    );
+    let file_path = format!("{}/build-time", env::var("OUT_DIR").unwrap());
     let mut file = File::create(&file_path).unwrap();
 
     let build_time = chrono::Local::now()
-        .format("built on %Y-%m-%d at %H:%M:%S")
+        .format("Built on %Y-%m-%d at %H:%M:%S")
         .to_string();
 
     write!(file, r#""{}""#, build_time).ok();

@@ -6,9 +6,9 @@ use glam::Vec2;
 
 use crate::{
     constants::{
-        ABOUT_CHAR_SCALE, ABOUT_TEXT_POSITION, ABOUT_VERSION_AREA_WIDTH, ABOUT_VERSION_CHAR_SCALE,
-        ABOUT_VERSION_POSITION, BUILD_TIME, COLOR_GRAY, COLOR_LIGHT_GRAY, GO_BACK_LABEL_POSITION,
-        HOWTOPLAY_AND_ABOUT_AREA_WIDTH,
+        ABOUT_CHAR_SCALE, ABOUT_TEXT_POSITION, ABOUT_VERSION_AND_BUILDTIME_AREA_WIDTH,
+        ABOUT_VERSION_AND_BUILDTIME_CHAR_SCALE, ABOUT_VERSION_AND_BUILDTIME_POSITION, BUILD_TIME,
+        COLOR_GRAY, COLOR_LIGHT_GRAY, GO_BACK_LABEL_POSITION, HOWTOPLAY_AND_ABOUT_AREA_WIDTH,
     },
     input::Event,
     resources::Resources,
@@ -47,15 +47,19 @@ impl About {
             Align::Left,
         );
 
-        let version_str = format!("version {}\n{}", env!("CARGO_PKG_VERSION"), BUILD_TIME);
-        let mut version = Text::new(TextFragment {
-            text: version_str,
+        let mut version = env!("CARGO_PKG_VERSION").to_string();
+        if cfg!(debug_assertions) {
+            version = format!("{}_dev", version);
+        }
+        let version_and_buildtime_str = format!("Version: {}\n{}", version, BUILD_TIME);
+        let mut version_and_buildtime = Text::new(TextFragment {
+            text: version_and_buildtime_str,
             color: Some(COLOR_GRAY),
             font: Some(font),
-            scale: Some(PxScale::from(ABOUT_VERSION_CHAR_SCALE)),
+            scale: Some(PxScale::from(ABOUT_VERSION_AND_BUILDTIME_CHAR_SCALE)),
         });
-        version.set_bounds(
-            Vec2::new(ABOUT_VERSION_AREA_WIDTH, f32::INFINITY),
+        version_and_buildtime.set_bounds(
+            Vec2::new(ABOUT_VERSION_AND_BUILDTIME_AREA_WIDTH, f32::INFINITY),
             Align::Right,
         );
 
@@ -65,7 +69,7 @@ impl About {
                 .get_go_back()
                 .clone(),
             about,
-            version,
+            version: version_and_buildtime,
         }
     }
 }
@@ -95,7 +99,10 @@ impl StageTrait for About {
         graphics::queue_text(
             ctx,
             &self.version,
-            Vec2::new(ABOUT_VERSION_POSITION.0, ABOUT_VERSION_POSITION.1),
+            Vec2::new(
+                ABOUT_VERSION_AND_BUILDTIME_POSITION.0,
+                ABOUT_VERSION_AND_BUILDTIME_POSITION.1,
+            ),
             None,
         );
 
