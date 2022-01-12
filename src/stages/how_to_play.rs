@@ -7,12 +7,13 @@ use glam::Vec2;
 
 use crate::{
     constants::{
-        COLOR_GRAY, COLOR_GREEN, COLOR_RED, GO_BACK_LABEL_POSITION, HOWTOPLAY_AND_ABOUT_AREA_WIDTH,
-        HOWTOPLAY_CONTROLS_CHAR_SCALE, HOWTOPLAY_CONTROLS_LEFTSIDE_TEXT_POSITION_X,
-        HOWTOPLAY_CONTROLS_RIGHTSIDE_TEXT_POSITION_X, HOWTOPLAY_CONTROLS_TEXT_POSITION_Y,
-        HOWTOPLAY_LINE_DELIMITER_END_POSITION_X, HOWTOPLAY_LINE_DELIMITER_POSITION_Y,
-        HOWTOPLAY_LINE_DELIMITER_START_POSITION_X, HOWTOPLAY_LINE_DELIMITER_WIDTH,
-        HOWTOPLAY_SCORING_CHAR_SCALE, HOWTOPLAY_SCORING_RULES_TEXT_POSITION,
+        COLOR_GRAY, COLOR_GREEN, COLOR_ORANGE, COLOR_YELLOW, GO_BACK_LABEL_POSITION,
+        HOWTOPLAY_AND_ABOUT_AREA_WIDTH, HOWTOPLAY_CONTROLS_CHAR_SCALE,
+        HOWTOPLAY_CONTROLS_LEFTSIDE_TEXT_POSITION_X, HOWTOPLAY_CONTROLS_RIGHTSIDE_TEXT_POSITION_X,
+        HOWTOPLAY_CONTROLS_TEXT_POSITION_Y, HOWTOPLAY_LINE_DELIMITER_END_POSITION_X,
+        HOWTOPLAY_LINE_DELIMITER_POSITION_Y, HOWTOPLAY_LINE_DELIMITER_START_POSITION_X,
+        HOWTOPLAY_LINE_DELIMITER_WIDTH, HOWTOPLAY_SCORING_CHAR_SCALE,
+        HOWTOPLAY_SCORING_RULES_TEXT_POSITION,
     },
     input::Event,
     resources::Resources,
@@ -40,7 +41,7 @@ impl HowToPlay {
         ";
         let mut controls_leftside = Text::new(TextFragment {
             text: controls_leftside_str.to_string(),
-            color: Some(COLOR_RED),
+            color: Some(COLOR_ORANGE),
             font: Some(font),
             scale: Some(PxScale::from(HOWTOPLAY_CONTROLS_CHAR_SCALE)),
         });
@@ -58,7 +59,7 @@ impl HowToPlay {
         ";
         let mut controls_rightside = Text::new(TextFragment {
             text: controls_rightside_str.to_string(),
-            color: Some(COLOR_RED),
+            color: Some(COLOR_YELLOW),
             font: Some(font),
             scale: Some(PxScale::from(HOWTOPLAY_CONTROLS_CHAR_SCALE)),
         });
