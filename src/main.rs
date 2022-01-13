@@ -4,7 +4,7 @@
 #![warn(clippy::nursery)]
 #![warn(clippy::cargo)]
 // from clippy::restriction:
-//#![warn(clippy::unwrap_used)]
+#![warn(clippy::unwrap_used)]
 #![warn(clippy::todo)]
 #![warn(clippy::print_stdout)] // FIXME - BUG in clippy
 

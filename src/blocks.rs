@@ -14,7 +14,7 @@ use rand::rngs::ThreadRng;
 use rand::Rng;
 
 use ggez::graphics::{self, mint::Point2, Color, DrawMode, DrawParam, Mesh, Rect};
-use ggez::Context;
+use ggez::{Context, GameResult};
 
 use crate::constants::{
     BLOCK_COLOR_BLUE, BLOCK_COLOR_CYAN, BLOCK_COLOR_GREEN, BLOCK_COLOR_MAGENTA, BLOCK_COLOR_RED,
@@ -77,11 +77,11 @@ impl Block {
         }
     }
 
-    // TODO ggez::graphics::MeshBatch
-    pub fn draw(&mut self, ctx: &mut Context) {
-        let block_mesh =
-            Mesh::new_rectangle(ctx, DrawMode::fill(), self.rect, self.color.color).unwrap();
-        graphics::draw(ctx, &block_mesh, DrawParam::default()).unwrap();
+    pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+        let block_mesh = Mesh::new_rectangle(ctx, DrawMode::fill(), self.rect, self.color.color)?;
+        graphics::draw(ctx, &block_mesh, DrawParam::default())?;
+
+        Ok(())
     }
 }
 
@@ -128,6 +128,7 @@ impl Factory {
 
     pub fn create_next_cargo(&mut self) -> Cargo {
         let mut color_block_randomly = |point| {
+            #[allow(clippy::unwrap_used)]
             let color = Self::COLORS.choose(&mut self.rng).unwrap();
             Block::new(point, BLOCK_SIZE, *color)
         };
@@ -169,6 +170,7 @@ impl Factory {
 
     pub fn change_block_color_randomly(&mut self, block: &mut Block) {
         let mut new_block_color;
+        #[allow(clippy::unwrap_used)]
         loop {
             new_block_color = Self::COLORS.choose(&mut self.rng).unwrap();
             if new_block_color.code != block.color.code {

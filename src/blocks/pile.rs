@@ -4,7 +4,7 @@ use std::{
     mem,
 };
 
-use ggez::Context;
+use ggez::{Context, GameResult};
 
 use crate::{
     constants::{BLOCK_SIZE, GAME_ARENA_COLUMNS, GAME_ARENA_RECT, GAME_ARENA_ROWS, NO_BLOCK_CODE},
@@ -75,6 +75,7 @@ impl Pile {
             let column_top_idx = self.column_tops[col_idx].0;
             if column_top_idx >= 2 {
                 for row_idx in (0..=column_top_idx as usize).rev() {
+                    #[allow(clippy::unwrap_used)]
                     let block = self.matrix[col_idx][row_idx as usize].unwrap();
                     sequence.push((block.color.code, col_idx, row_idx as usize));
                 }
@@ -273,6 +274,7 @@ impl Pile {
         let mut matched_blocks = Vec::with_capacity(unique_match_positions.len());
         for m in unique_match_positions {
             let block = mem::take(&mut self.matrix[m.0][m.1]);
+            #[allow(clippy::unwrap_used)]
             matched_blocks.push(block.unwrap());
         }
         matched_blocks
@@ -292,6 +294,7 @@ impl Pile {
         }
         // MAKE DANGLING BLOCKS FALL
         for (col_idx, row_idxs) in matched_blocks_row_idxs_by_col_idx {
+            #[allow(clippy::unwrap_used)]
             let lowest_matched_block_idx = *row_idxs.iter().min_by(Ord::cmp).unwrap();
             let mut num_empty_slots: usize = 0;
             for row_idx in lowest_matched_block_idx..=self.column_tops[col_idx].0 as usize {
@@ -314,6 +317,7 @@ impl Pile {
 
     #[inline]
     fn get_topmost_column_idx(&self) -> isize {
+        #[allow(clippy::unwrap_used)]
         self.column_tops
             .iter()
             .max_by(|top1, top2| top1.0.cmp(&top2.0))
@@ -344,14 +348,15 @@ impl Pile {
         blocks
     }
 
-    pub fn draw(&mut self, ctx: &mut Context) {
+    pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         for col_idx in 0..GAME_ARENA_COLUMNS {
             for row_idx in 0..GAME_ARENA_ROWS {
                 if let Some(mut block) = self.matrix[col_idx][row_idx] {
-                    block.draw(ctx);
+                    block.draw(ctx)?;
                 }
             }
         }
+        Ok(())
     }
 
     pub fn __print(&self) {

@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter, Result};
 
-use ggez::{graphics::Rect, Context};
+use ggez::{graphics::Rect, Context, GameResult};
 
 use crate::constants::{BLOCK_SIZE, GAME_ARENA_COLUMNS, GAME_ARENA_RECT};
 
@@ -115,12 +115,13 @@ impl Cargo {
         blocks
     }
 
-    pub fn draw(&mut self, ctx: &mut Context) {
+    pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         for i in 0..3 {
             if self.blocks[i].rect.bottom() > GAME_ARENA_RECT.top() {
-                self.blocks[i].draw(ctx);
+                self.blocks[i].draw(ctx)?;
             }
         }
+        Ok(())
     }
 }
 

@@ -259,11 +259,10 @@ impl StageTrait for MainMenu {
             DrawParam::default(),
             None,
             graphics::FilterMode::Linear,
-        )
-        .unwrap();
+        )?;
 
-        self.selected_item_blocks[0].draw(ctx);
-        self.selected_item_blocks[1].draw(ctx);
+        self.selected_item_blocks[0].draw(ctx)?;
+        self.selected_item_blocks[1].draw(ctx)?;
 
         Ok(())
     }

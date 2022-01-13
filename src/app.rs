@@ -1,6 +1,6 @@
 use std::{
     env,
-    fs::{self, File},
+    fs::{self, OpenOptions},
     io::Write,
     mem,
     path::PathBuf,
@@ -82,7 +82,7 @@ fn create_exe_relative_dir_path(dir: &str) -> PathBuf {
     root_path.join(dir)
 }
 
-fn log_error(origin: &str, error: &GameError) {
+pub fn log_error(origin: &str, error: &GameError) {
     let mut error_log = None;
 
     let error_logs_dir_path = create_exe_relative_dir_path("__errors");
@@ -93,7 +93,11 @@ fn log_error(origin: &str, error: &GameError) {
         let date_and_time = Local::now().format("on %Y-%m-%d at %H_%M_%S").to_string();
         let error_log_file_name = format!("ERROR {}.log", date_and_time);
         let error_log_file_path = error_logs_dir_path.join(error_log_file_name);
-        if let Ok(created_file) = File::create(error_log_file_path) {
+        if let Ok(created_file) = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(error_log_file_path)
+        {
             error_log = Some(created_file);
         } else {
             eprintln!("Error log file could not be created!");
@@ -101,7 +105,7 @@ fn log_error(origin: &str, error: &GameError) {
     }
 
     if let Some(mut error_log) = error_log {
-        let error = format!("### ERROR\n{}\n\n### ORIGIN\n{}\n", error, origin);
+        let error = format!("# {}\n{}\n\n", origin, error);
         let write_result = error_log.write_all(error.as_bytes());
         if write_result.is_err() {
             eprintln!(

@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use ggez::{
     graphics::{self, DrawParam, Mesh},
     mint::Point2,
-    Context,
+    Context, GameResult,
 };
 
 use crate::{
@@ -90,9 +90,11 @@ impl Matching {
             for r#match in matches {
                 num_of_matching_blocks.push(r#match.len());
 
+                #[allow(clippy::unwrap_used)]
                 let pos_first = r#match.first().unwrap();
                 let start_point = idx_pair_to_center_point_of_block(pos_first);
 
+                #[allow(clippy::unwrap_used)]
                 let pos_last = r#match.last().unwrap();
                 let end_point = idx_pair_to_center_point_of_block(pos_last);
 
@@ -135,17 +137,17 @@ impl Matching {
         self.blocks.clone()
     }
 
-    pub fn draw(&mut self, ctx: &mut Context) {
+    pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         if self.blinking_animation_stage % 2 == 0 {
             for block in &mut self.blocks {
-                block.draw(ctx);
+                block.draw(ctx)?;
             }
         } else {
             for points in &self.match_direction_indicators {
-                let line_mesh =
-                    Mesh::new_line(ctx, &[points.0, points.1], 1.0, COLOR_LIGHT_GRAY).unwrap();
-                graphics::draw(ctx, &line_mesh, DrawParam::default()).unwrap();
+                let line_mesh = Mesh::new_line(ctx, &[points.0, points.1], 1.0, COLOR_LIGHT_GRAY)?;
+                graphics::draw(ctx, &line_mesh, DrawParam::default())?;
             }
         }
+        Ok(())
     }
 }

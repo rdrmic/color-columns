@@ -3,6 +3,9 @@
 use std::fs::{self, File};
 use std::io::{Read, Write};
 
+use ggez::GameError;
+
+use crate::app::log_error;
 use crate::constants::APP_NAME;
 
 /*******************************************************************************
@@ -37,17 +40,42 @@ impl Scoring {
     }
 
     pub fn load_highscore() -> usize {
-        let file_path = dirs::data_dir()
-            .unwrap()
-            .join(Self::HIGHSCORE_DIRNAME)
-            .join(Self::HIGHSCORE_FILENAME);
-        if let Ok(mut file) = File::open(file_path) {
-            let mut str_buf = String::new();
-            if file.read_to_string(&mut str_buf).is_ok() {
-                return str_buf.parse::<usize>().unwrap();
-            }
+        fn notify_about_error(error_msg: String) {
+            eprintln!("{}", error_msg);
+            log_error("load_highscore", &GameError::CustomError(error_msg));
         }
-        0
+
+        let mut highscore = 0;
+        if let Some(user_data_dir_path) = dirs::data_dir() {
+            let file_path = user_data_dir_path
+                .join(Self::HIGHSCORE_DIRNAME)
+                .join(Self::HIGHSCORE_FILENAME);
+            if let Ok(mut file) = File::open(file_path) {
+                let mut str_buf = String::new();
+                match file.read_to_string(&mut str_buf) {
+                    Ok(_) => match str_buf.parse::<usize>() {
+                        Ok(parsed_highscore) => highscore = parsed_highscore,
+                        Err(error) => notify_about_error(format!(
+                            "Highscore could not be parsed from the file: {:?}",
+                            error
+                        )),
+                    },
+                    Err(error) => {
+                        notify_about_error(format!(
+                            "Highscore file could not be read: {:?}",
+                            error
+                        ));
+                    }
+                }
+            } else {
+                eprintln!("Highscore file could not be open. Maybe it doesn't exist yet?");
+            }
+        } else {
+            notify_about_error(
+                "User's data dir is not found, the highscore could not be loaded".to_string(),
+            );
+        }
+        highscore
     }
 
     pub fn update_from_matches(
@@ -88,45 +116,62 @@ impl Scoring {
     }
 
     pub fn save_highscore(&mut self) {
+        fn notify_about_error(error_msg: String) {
+            eprintln!("{}", error_msg);
+            log_error("save_highscore", &GameError::CustomError(error_msg));
+        }
+
         if self.score <= self.highscore {
             return;
         }
 
         let mut file = None;
 
-        let file_path = dirs::data_dir()
-            .unwrap()
-            .join(Self::HIGHSCORE_DIRNAME)
-            .join(Self::HIGHSCORE_FILENAME);
-        if file_path.exists() {
-            if let Ok(truncated_file) = File::create(file_path) {
-                file = Some(truncated_file);
-            }
-        } else {
-            let mut data_dir_path = dirs::data_dir().unwrap();
-            data_dir_path.push(Self::HIGHSCORE_DIRNAME);
-            if !data_dir_path.exists() {
-                if fs::create_dir_all(&data_dir_path).is_ok() {
-                    let file_path = data_dir_path.join(Self::HIGHSCORE_FILENAME);
-                    if let Ok(created_file) = File::create(file_path) {
-                        file = Some(created_file);
-                    } else {
-                        eprintln!("Highscore file could not be created!");
+        if let Some(user_data_dir_path) = dirs::data_dir() {
+            let file_path = user_data_dir_path
+                .join(Self::HIGHSCORE_DIRNAME)
+                .join(Self::HIGHSCORE_FILENAME);
+            if file_path.exists() {
+                if let Ok(truncated_file) = File::create(file_path) {
+                    file = Some(truncated_file);
+                }
+            } else {
+                let dir_path = user_data_dir_path.join(Self::HIGHSCORE_DIRNAME);
+                if !dir_path.exists() {
+                    match fs::create_dir_all(&dir_path) {
+                        Ok(_) => {
+                            let file_path = dir_path.join(Self::HIGHSCORE_FILENAME);
+                            match File::create(file_path) {
+                                Ok(created_file) => file = Some(created_file),
+                                Err(error) => notify_about_error(format!(
+                                    "Highscore file could not be created: {:?}",
+                                    error
+                                )),
+                            }
+                        }
+                        Err(error) => notify_about_error(format!(
+                            "Highscore directory could not be created: {:?}",
+                            error
+                        )),
                     }
-                } else {
-                    eprintln!("Highscore directory could not be created!");
                 }
             }
+        } else {
+            notify_about_error(
+                "User's data dir is not found, the highscore could not be saved".to_string(),
+            );
         }
 
         if let Some(mut file) = file {
             let write_result = file.write_all(self.score.to_string().as_bytes());
             if write_result.is_err() {
                 eprintln!(
-                    "Could not write highscore to file! {:?}",
+                    "Could not write the highscore to the file: {:?}",
                     write_result.unwrap_err()
                 );
             }
+        } else {
+            notify_about_error("Failed to create a highscore file".to_string());
         }
     }
 }

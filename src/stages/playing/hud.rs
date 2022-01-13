@@ -2,7 +2,7 @@ use glam::Vec2;
 
 use ggez::{
     graphics::{self, Color, DrawParam, Font, PxScale, Text, TextFragment},
-    Context,
+    Context, GameResult,
 };
 
 use crate::{
@@ -190,8 +190,8 @@ impl Hud {
     }
 
     pub fn update_game_info(&mut self) {
-        if self.game_info.is_some() {
-            match self.game_info.as_ref().unwrap().r#type {
+        if let Some(game_info) = &self.game_info {
+            match game_info.r#type {
                 GameInfoType::Go => self.update_game_info_go(),
                 GameInfoType::Speedup => self.update_game_info_speedup(),
                 GameInfoType::MaxSpeed => self.update_game_info_maxspeed(),
@@ -204,20 +204,21 @@ impl Hud {
         self.num_frames += 1;
         if self.num_blinks < 3 {
             if self.num_frames % NUM_TICKS_FOR_PLAYING_STATE_GO_BLINKING == 0 {
-                let game_info = self.game_info.as_mut().unwrap();
-                let mut playing_state_fragment = &mut game_info.playing_state.fragments_mut()[0];
-                if let Some(mut playing_state_color) = playing_state_fragment.color {
-                    if playing_state_color == Color::BLACK {
-                        playing_state_color = COLOR_GREEN;
-                    } else {
-                        playing_state_color = Color::BLACK;
-                        self.num_blinks += 1;
+                if let Some(game_info) = &mut self.game_info {
+                    let mut playing_state_fragment =
+                        &mut game_info.playing_state.fragments_mut()[0];
+                    if let Some(mut playing_state_color) = playing_state_fragment.color {
+                        if playing_state_color == Color::BLACK {
+                            playing_state_color = COLOR_GREEN;
+                        } else {
+                            playing_state_color = Color::BLACK;
+                            self.num_blinks += 1;
+                        }
+                        playing_state_fragment.color = Some(playing_state_color);
                     }
-                    playing_state_fragment.color = Some(playing_state_color);
                 }
             }
-        } else {
-            let game_info = self.game_info.as_mut().unwrap();
+        } else if let Some(game_info) = &mut self.game_info {
             if let Some(game_info_instructions) = &mut game_info.instructions {
                 let mut instructions_fragment = &mut game_info_instructions.fragments_mut()[0];
                 if let Some(mut instructions_color) = instructions_fragment.color {
@@ -235,25 +236,25 @@ impl Hud {
     fn update_game_info_speedup(&mut self) {
         self.num_frames += 1;
         if self.num_frames % NUM_TICKS_FOR_PLAYING_STATE_SPEEDUP_BLINKING == 0 {
-            let game_info = self.game_info.as_mut().unwrap();
-            let mut playing_state_fragment = &mut game_info.playing_state.fragments_mut()[0];
-            if let Some(mut playing_state_color) = playing_state_fragment.color {
-                if playing_state_color == COLOR_BLUE {
-                    playing_state_color = Color::BLACK;
-                } else {
-                    playing_state_color = COLOR_BLUE;
-                    self.num_blinks += 1;
-                }
-                if self.num_blinks < 3 {
-                    playing_state_fragment.color = Some(playing_state_color);
-                } else {
-                    let next_game_info = if self.maxspeed_reached {
-                        GameInfoType::MaxSpeed
+            if let Some(game_info) = &mut self.game_info {
+                let mut playing_state_fragment = &mut game_info.playing_state.fragments_mut()[0];
+                if let Some(mut playing_state_color) = playing_state_fragment.color {
+                    if playing_state_color == COLOR_BLUE {
+                        playing_state_color = Color::BLACK;
                     } else {
-                        GameInfoType::None
-                    };
-
-                    self.reset_animation(next_game_info);
+                        playing_state_color = COLOR_BLUE;
+                        self.num_blinks += 1;
+                    }
+                    if self.num_blinks < 3 {
+                        playing_state_fragment.color = Some(playing_state_color);
+                    } else {
+                        let next_game_info = if self.maxspeed_reached {
+                            GameInfoType::MaxSpeed
+                        } else {
+                            GameInfoType::None
+                        };
+                        self.reset_animation(next_game_info);
+                    }
                 }
             }
         }
@@ -261,18 +262,15 @@ impl Hud {
 
     fn update_game_info_maxspeed(&mut self) {
         self.num_frames += 1;
-        let game_info_playing_state_fragment = &mut self
-            .game_info
-            .as_mut()
-            .unwrap()
-            .playing_state
-            .fragments_mut()[0];
-        if let Some(mut playing_state_color) = game_info_playing_state_fragment.color {
-            playing_state_color.a -= 0.0018;
-            if playing_state_color.a > 0.0 {
-                game_info_playing_state_fragment.color = Some(playing_state_color);
-            } else {
-                self.reset_animation(GameInfoType::None);
+        if let Some(game_info) = &mut self.game_info {
+            let playing_state_fragment = &mut game_info.playing_state.fragments_mut()[0];
+            if let Some(mut playing_state_color) = playing_state_fragment.color {
+                playing_state_color.a -= 0.0018;
+                if playing_state_color.a > 0.0 {
+                    playing_state_fragment.color = Some(playing_state_color);
+                } else {
+                    self.reset_animation(GameInfoType::None);
+                }
             }
         }
     }
@@ -296,7 +294,7 @@ impl Hud {
         }*/
     }
 
-    pub fn draw(&mut self, ctx: &mut Context) {
+    pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         // GAME INFO
         if let Some(game_info) = &self.game_info {
             graphics::queue_text(
@@ -368,8 +366,8 @@ impl Hud {
             DrawParam::default(),
             None,
             graphics::FilterMode::Linear,
-        )
-        .unwrap();
+        )?;
+        Ok(())
     }
 }
 

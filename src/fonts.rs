@@ -1,5 +1,7 @@
 use ggez::{graphics::Font, Context};
 
+use crate::app::log_error;
+
 #[derive(Clone, Copy)]
 pub struct Fonts {
     extra_bold: Font,
@@ -10,9 +12,19 @@ pub struct Fonts {
 impl Fonts {
     pub fn load(ctx: &mut Context) -> Self {
         Self {
-            extra_bold: Font::new(ctx, "/ArgentumSans-ExtraBold.otf").unwrap(),
-            semi_bold: Font::new(ctx, "/ArgentumSans-SemiBold.otf").unwrap(),
-            light_italic: Font::new(ctx, "/ArgentumSans-LightItalic.otf").unwrap(),
+            extra_bold: Self::load_font(ctx, "/ArgentumSans-ExtraBold.otf"),
+            semi_bold: Self::load_font(ctx, "/ArgentumSans-SemiBold.otf"),
+            light_italic: Self::load_font(ctx, "/ArgentumSans-LightItalic.otf"),
+        }
+    }
+
+    fn load_font(ctx: &mut Context, filename: &str) -> Font {
+        match Font::new(ctx, filename) {
+            Ok(font) => font,
+            Err(error) => {
+                log_error("load_font", &error);
+                panic!("{}", &error);
+            }
         }
     }
 

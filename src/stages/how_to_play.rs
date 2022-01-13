@@ -149,9 +149,8 @@ impl StageTrait for HowToPlay {
             &[start_point, end_point],
             HOWTOPLAY_LINE_DELIMITER_WIDTH,
             COLOR_GRAY,
-        )
-        .unwrap();
-        graphics::draw(ctx, &separating_line, DrawParam::default()).unwrap();
+        )?;
+        graphics::draw(ctx, &separating_line, DrawParam::default())?;
 
         graphics::queue_text(
             ctx,
@@ -168,8 +167,7 @@ impl StageTrait for HowToPlay {
             DrawParam::default(),
             None,
             graphics::FilterMode::Linear,
-        )
-        .unwrap();
+        )?;
 
         Ok(())
     }

@@ -45,16 +45,16 @@ impl GameArena {
         }
     }
 
-    // FIXME use GameResult throughout the app instead of unwrap()
-    fn draw(&mut self, ctx: &mut Context) {
+    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         let game_arena_mesh = Mesh::new_rectangle(
             ctx,
             DrawMode::Stroke(StrokeOptions::default()),
             self.border_rect,
             self.border_color,
-        )
-        .unwrap();
-        graphics::draw(ctx, &game_arena_mesh, DrawParam::default()).unwrap();
+        )?;
+        graphics::draw(ctx, &game_arena_mesh, DrawParam::default())?;
+
+        Ok(())
     }
 }
 
@@ -188,9 +188,11 @@ impl Playing {
 
     fn begin_next_cargo_descent(&mut self) {
         self.descending_cargo = Some(
+            #[allow(clippy::unwrap_used)]
             self.blocks_factory
                 .put_cargo_in_arena(mem::take(&mut self.next_cargo).unwrap()),
         );
+
         self.next_cargo = Some(self.blocks_factory.create_next_cargo());
 
         if self.num_ticks_for_cargo_descent > NUM_TICKS_GAMEPLAY_ACCELERATION_LIMIT
@@ -221,6 +223,7 @@ impl Playing {
     fn get_all_visible_blocks(&self) -> Vec<Block> {
         let mut num_of_visible_blocks = 0;
         // NEXT CARGO
+        #[allow(clippy::unwrap_used)]
         let mut next_cargo_blocks = self.next_cargo.as_ref().unwrap().get_visible_blocks();
         num_of_visible_blocks += next_cargo_blocks.len();
         // DESCENDING CARGO
@@ -256,6 +259,7 @@ impl Playing {
     }
 
     fn shuffle_block_colors(&mut self) {
+        #[allow(clippy::unwrap_used)]
         for block in self.paused_blocks.as_mut().unwrap() {
             self.blocks_factory.change_block_color_randomly(block);
         }
@@ -271,6 +275,7 @@ impl Playing {
     fn quit_to_main_menu(&mut self) {
         //println!("Playing.quit_to_main_menu()");
         // FIXME refactor
+        self.scoring.save_highscore();
         self.playing_state = Some(PlayingState::QuittingToMainMenu);
         self.descending_cargo = None;
         self.pile = Pile::new();
@@ -312,11 +317,11 @@ impl Playing {
 
         if self.is_cargo_at_bottom && self.is_descending_over {
             self.begin_next_cargo_descent();
-            self.is_cargo_at_bottom = self
-                .descending_cargo
-                .as_mut()
-                .unwrap()
-                .descend_one_step(&self.pile);
+
+            #[allow(clippy::unwrap_used)]
+            let descending_cargo = self.descending_cargo.as_mut().unwrap();
+            self.is_cargo_at_bottom = descending_cargo.descend_one_step(&self.pile);
+
             self.is_descending_over = false;
         }
 
@@ -356,10 +361,10 @@ impl Playing {
             if self.is_descending_over {
                 self.num_descended_cargoes += 1;
 
+                #[allow(clippy::unwrap_used)]
                 let num_of_remaining_places_in_column = self
                     .pile
                     .take_cargo(&mem::take(&mut self.descending_cargo).unwrap());
-
                 if num_of_remaining_places_in_column < 0 {
                     self.game_over();
                     //println!("PlayingState::GameOver =>");
@@ -519,23 +524,23 @@ impl StageTrait for Playing {
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        self.hud.draw(ctx);
-        self.game_arena.draw(ctx);
+        self.hud.draw(ctx)?;
+        self.game_arena.draw(ctx)?;
 
         if let Some(paused_blocks) = self.paused_blocks.as_deref_mut() {
             for block in paused_blocks {
-                block.draw(ctx);
+                block.draw(ctx)?;
             }
         } else {
             if let Some(next_cargo) = &mut self.next_cargo {
-                next_cargo.draw(ctx);
+                next_cargo.draw(ctx)?;
             }
             if let Some(descending_cargo) = &mut self.descending_cargo {
-                descending_cargo.draw(ctx);
+                descending_cargo.draw(ctx)?;
             }
-            self.pile.draw(ctx);
+            self.pile.draw(ctx)?;
             if let Some(matching) = &mut self.matching {
-                matching.draw(ctx);
+                matching.draw(ctx)?;
             }
         }
 

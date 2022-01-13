@@ -111,8 +111,7 @@ impl StageTrait for About {
             DrawParam::default(),
             None,
             graphics::FilterMode::Linear,
-        )
-        .unwrap();
+        )?;
 
         Ok(())
     }

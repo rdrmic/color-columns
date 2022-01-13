@@ -3,7 +3,9 @@
 use std::fs;
 
 use ggez::mint::Point2;
+use ggez::GameError;
 
+use crate::app::log_error;
 use crate::blocks::pile::Pile;
 use crate::blocks::{idx_to_position, Block, Factory};
 use crate::constants::{
@@ -11,10 +13,21 @@ use crate::constants::{
 };
 
 pub fn create_pile_from_file() -> Pile {
-    let matrix_snapshot = fs::read_to_string("snapshots/snapshot.txt").unwrap();
+    let snapshot_path = "snapshots/snapshot.txt";
+    let matrix_snapshot = match fs::read_to_string(snapshot_path) {
+        Ok(matrix_as_string) => matrix_as_string,
+        Err(error) => {
+            log_error(
+                "snapshot::create_pile_from_file",
+                &GameError::CustomError(format!("{} -> {}", error, snapshot_path)),
+            );
+            panic!("{}", &error);
+        }
+    };
 
     let mut matrix_snapshot_vec = Vec::with_capacity(GAME_ARENA_ROWS);
     for line in matrix_snapshot.lines().rev() {
+        #[allow(clippy::unwrap_used)]
         let row: Vec<char> = line
             .split_whitespace()
             .map(|str| str.chars().next().unwrap())
