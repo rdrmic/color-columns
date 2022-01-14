@@ -17,7 +17,7 @@ use ggez::graphics::{self, mint::Point2, Color, DrawMode, DrawParam, Mesh, Rect}
 use ggez::{Context, GameResult};
 
 use crate::constants::{
-    BLOCK_COLOR_BLUE, BLOCK_COLOR_CYAN, BLOCK_COLOR_GREEN, BLOCK_COLOR_MAGENTA, BLOCK_COLOR_RED,
+    BLOCK_COLOR_BLUE, BLOCK_COLOR_GREEN, BLOCK_COLOR_MAGENTA, BLOCK_COLOR_ORANGE, BLOCK_COLOR_RED,
     BLOCK_COLOR_YELLOW, BLOCK_SIZE, GAME_ARENA_COLUMNS, GAME_ARENA_MARGIN_LEFT, GAME_ARENA_RECT,
 };
 
@@ -115,7 +115,7 @@ impl Factory {
         BLOCK_COLOR_RED,
         BLOCK_COLOR_GREEN,
         BLOCK_COLOR_BLUE,
-        BLOCK_COLOR_CYAN,
+        BLOCK_COLOR_ORANGE,
         BLOCK_COLOR_MAGENTA,
         BLOCK_COLOR_YELLOW,
     ];
@@ -124,6 +124,15 @@ impl Factory {
         Self {
             rng: rand::thread_rng(),
         }
+    }
+
+    pub fn get_block_color_by_code(code: char) -> Color {
+        for block_color in Self::COLORS {
+            if block_color.code == code {
+                return block_color.color;
+            }
+        }
+        panic!("Block color with code '{}' does not exist!", code);
     }
 
     pub fn create_next_cargo(&mut self) -> Cargo {

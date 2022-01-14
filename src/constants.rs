@@ -38,13 +38,13 @@ pub const BLOCK_COLOR_BLUE: BlockColor = BlockColor {
     code: 'B',
     color: COLOR_BLUE,
 };
-pub const BLOCK_COLOR_CYAN: BlockColor = BlockColor {
-    code: 'C',
-    color: COLOR_ORANGE,
-};
 pub const BLOCK_COLOR_MAGENTA: BlockColor = BlockColor {
     code: 'M',
     color: COLOR_MAGENTA,
+};
+pub const BLOCK_COLOR_ORANGE: BlockColor = BlockColor {
+    code: 'O',
+    color: COLOR_ORANGE,
 };
 pub const BLOCK_COLOR_YELLOW: BlockColor = BlockColor {
     code: 'Y',
