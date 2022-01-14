@@ -1,43 +1,44 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 use ggez::{
-    graphics::{self, DrawParam, Mesh},
+    graphics::{self, Color, DrawParam, Mesh},
     mint::Point2,
     Context, GameResult,
 };
 
 use crate::{
-    blocks::idx_pair_to_center_point_of_block,
-    constants::{COLOR_LIGHT_GRAY, NUM_TICKS_SEQUENCE_FOR_MATCHES_REMOVAL},
-    stages::playing::Direction,
+    blocks::idx_pair_to_center_point_of_block, constants::NUM_TICKS_SEQUENCE_FOR_MATCHES_REMOVAL,
 };
 
-use super::{pile::Pile, Block};
+use super::{
+    pile::{Matches, Pile},
+    Block,
+};
 
 /*******************************************************************************
 **** MATCHING
 *******************************************************************************/
+type ExtractedMatchingData = (
+    Vec<usize>,
+    Vec<(Color, [Point2<f32>; 2])>,
+    HashSet<[usize; 2]>,
+    Vec<Block>,
+);
+
 #[derive(Debug)]
 pub struct Matching {
     num_of_sequential_matchings: usize,
 
     num_of_matching_blocks: Vec<usize>,
-    match_direction_indicators: Vec<(Point2<f32>, Point2<f32>)>,
-    unique_match_indexes: HashSet<(usize, usize)>,
+    match_direction_indicators: Vec<(Color, [Point2<f32>; 2])>,
+    unique_match_indexes: HashSet<[usize; 2]>,
     blocks: Vec<Block>,
 
     blinking_animation_stage: usize,
 }
 
-type MatchingData = (
-    Vec<usize>,
-    Vec<(Point2<f32>, Point2<f32>)>,
-    HashSet<(usize, usize)>,
-    Vec<Block>,
-);
-
 impl Matching {
-    pub fn new(matches: &HashMap<Direction, Vec<Vec<(usize, usize)>>>, pile: &mut Pile) -> Self {
+    pub fn new(matches: &Matches, pile: &mut Pile) -> Self {
         let (num_of_matching_blocks, match_direction_indicators, unique_match_indexes, blocks) =
             Self::extract_matching_data_from_matches(matches, pile);
 
@@ -53,11 +54,7 @@ impl Matching {
         }
     }
 
-    pub fn new_chained_match(
-        &mut self,
-        matches: &HashMap<Direction, Vec<Vec<(usize, usize)>>>,
-        pile: &mut Pile,
-    ) {
+    pub fn new_chained_match(&mut self, matches: &Matches, pile: &mut Pile) {
         self.num_of_sequential_matchings += 1;
 
         let (num_of_matching_blocks, match_direction_indicators, unique_match_indexes, blocks) =
@@ -80,27 +77,27 @@ impl Matching {
     }
 
     fn extract_matching_data_from_matches(
-        matches: &HashMap<Direction, Vec<Vec<(usize, usize)>>>,
+        matches: &Matches,
         pile: &mut Pile,
-    ) -> MatchingData {
+    ) -> ExtractedMatchingData {
         let mut num_of_matching_blocks = Vec::new();
         let mut match_direction_indicators = Vec::new();
         let mut unique_match_indexes = HashSet::new();
         for matches in matches.values() {
             for r#match in matches {
-                num_of_matching_blocks.push(r#match.len());
+                num_of_matching_blocks.push(r#match.1.len());
 
                 #[allow(clippy::unwrap_used)]
-                let pos_first = r#match.first().unwrap();
+                let pos_first = r#match.1.first().unwrap();
                 let start_point = idx_pair_to_center_point_of_block(pos_first);
 
                 #[allow(clippy::unwrap_used)]
-                let pos_last = r#match.last().unwrap();
+                let pos_last = r#match.1.last().unwrap();
                 let end_point = idx_pair_to_center_point_of_block(pos_last);
 
-                match_direction_indicators.push((start_point, end_point));
+                match_direction_indicators.push((r#match.0, [start_point, end_point]));
 
-                for position in r#match {
+                for position in &r#match.1 {
                     unique_match_indexes.insert(*position);
                 }
             }
@@ -116,7 +113,7 @@ impl Matching {
     }
 
     #[inline]
-    pub fn get_unique_match_indexes(&self) -> &HashSet<(usize, usize)> {
+    pub fn get_unique_match_indexes(&self) -> &HashSet<[usize; 2]> {
         &self.unique_match_indexes
     }
 
@@ -143,8 +140,8 @@ impl Matching {
                 block.draw(ctx)?;
             }
         } else {
-            for points in &self.match_direction_indicators {
-                let line_mesh = Mesh::new_line(ctx, &[points.0, points.1], 1.0, COLOR_LIGHT_GRAY)?;
+            for (color, points) in &self.match_direction_indicators {
+                let line_mesh = Mesh::new_line(ctx, points, 2.0, *color)?;
                 graphics::draw(ctx, &line_mesh, DrawParam::default())?;
             }
         }

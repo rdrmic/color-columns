@@ -51,11 +51,10 @@ pub fn idx_to_position(idx: usize, axis: char) -> f32 {
     position
 }
 
-// TODO glam::Vec2::new(10.0, 10.0)
-pub fn idx_pair_to_center_point_of_block(idxs: &(usize, usize)) -> Point2<f32> {
+pub fn idx_pair_to_center_point_of_block(idxs: &[usize; 2]) -> Point2<f32> {
     Point2 {
-        x: BLOCK_SIZE.mul_add(idxs.0 as f32, GAME_ARENA_RECT.left()) + BLOCK_SIZE / 2.0,
-        y: (GAME_ARENA_RECT.bottom() - BLOCK_SIZE * idxs.1 as f32) - BLOCK_SIZE + BLOCK_SIZE / 2.0,
+        x: BLOCK_SIZE.mul_add(idxs[0] as f32, GAME_ARENA_RECT.left()) + BLOCK_SIZE / 2.0,
+        y: (GAME_ARENA_RECT.bottom() - BLOCK_SIZE * idxs[1] as f32) - BLOCK_SIZE + BLOCK_SIZE / 2.0,
     }
 }
 
@@ -69,7 +68,7 @@ pub struct Block {
 }
 
 impl Block {
-    // TODO glam::Vec2::new(10.0, 10.0)
+    // TODO glam::Vec2::new(10.0, 10.0) ?
     pub fn new(point: Point2<f32>, size: f32, color: BlockColor) -> Self {
         Self {
             rect: Rect::new(point.x, point.y, size, size),

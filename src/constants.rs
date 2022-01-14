@@ -9,7 +9,6 @@ pub const APP_NAME: &str = "Color Columns";
 pub const BUILD_TIME: &str = include!(concat!(env!("OUT_DIR"), "/build-time"));
 
 // WINDOW
-//pub const WINDOW_TITLE: &str = APP_NAME;
 pub const WINDOW_WIDTH: f32 = 400.0;
 pub const WINDOW_HEIGHT: f32 = 600.0;
 
@@ -146,7 +145,6 @@ pub const GAME_ARENA_MARGIN_LEFT: f32 = BLOCK_SIZE * 2.0 + 4.0;
 
 // GAMEPLAY
 pub const FPS: u32 = 60;
-//pub const NUM_TICKS_FOR_NEW_CARGO: usize = 20;    // TODO ?
 pub const STARTING_NUM_TICKS_FOR_CARGO_DESCENT: usize = 45;
 pub const NUM_DESCENDED_CARGOES_GAMEPLAY_ACCELERATION: usize = 9;
 pub const NUM_TICKS_GAMEPLAY_ACCELERATION_LIMIT: usize = 18;

@@ -4,18 +4,20 @@ use std::{
     mem,
 };
 
-use ggez::{Context, GameResult};
+use ggez::{graphics::Color, Context, GameResult};
 
 use crate::{
     constants::{BLOCK_SIZE, GAME_ARENA_COLUMNS, GAME_ARENA_RECT, GAME_ARENA_ROWS, NO_BLOCK_CODE},
     stages::playing::Direction,
 };
 
-use super::{cargo::Cargo, Block};
+use super::{cargo::Cargo, Block, Factory};
 
 /*******************************************************************************
 **** PILE
 *******************************************************************************/
+pub type Matches = HashMap<Direction, Vec<(Color, Vec<[usize; 2]>)>>;
+
 pub struct Pile {
     matrix: [[Option<Block>; GAME_ARENA_ROWS]; GAME_ARENA_COLUMNS],
     pub column_tops: [(isize, f32); GAME_ARENA_COLUMNS],
@@ -58,8 +60,8 @@ impl Pile {
     }
 
     /*** SEARCHING FOR MATCHES [BEGIN] ***/
-    pub fn search_for_matches(&self) -> HashMap<Direction, Vec<Vec<(usize, usize)>>> {
-        let mut matches = HashMap::<Direction, Vec<Vec<(usize, usize)>>>::new();
+    pub fn search_for_matches(&self) -> Matches {
+        let mut matches = Matches::new();
         self.collect_vertical_matches(&mut matches);
         self.collect_horizontal_matches(&mut matches);
         self.collect_diagonal_slash_matches(&mut matches);
@@ -67,7 +69,7 @@ impl Pile {
         matches
     }
 
-    fn collect_vertical_matches(&self, matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>) {
+    fn collect_vertical_matches(&self, matches: &mut Matches) {
         let mut sequence = Vec::with_capacity(GAME_ARENA_ROWS);
         let mut match_collector = Vec::<(char, usize, usize)>::with_capacity(5);
 
@@ -90,10 +92,7 @@ impl Pile {
         }
     }
 
-    fn collect_horizontal_matches(
-        &self,
-        matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
-    ) {
+    fn collect_horizontal_matches(&self, matches: &mut Matches) {
         let mut sequence = Vec::with_capacity(GAME_ARENA_COLUMNS);
         let mut match_collector = Vec::<(char, usize, usize)>::with_capacity(5);
 
@@ -115,10 +114,7 @@ impl Pile {
         }
     }
 
-    fn collect_diagonal_slash_matches(
-        &self,
-        matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
-    ) {
+    fn collect_diagonal_slash_matches(&self, matches: &mut Matches) {
         let mut sequence = Vec::with_capacity(max(GAME_ARENA_COLUMNS, GAME_ARENA_ROWS));
         let mut match_collector = Vec::<(char, usize, usize)>::with_capacity(5);
 
@@ -160,10 +156,7 @@ impl Pile {
         }
     }
 
-    fn collect_diagonal_backslash_matches(
-        &self,
-        matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
-    ) {
+    fn collect_diagonal_backslash_matches(&self, matches: &mut Matches) {
         let mut sequence = Vec::with_capacity(max(GAME_ARENA_COLUMNS, GAME_ARENA_ROWS));
         let mut match_collector = Vec::<(char, usize, usize)>::with_capacity(5);
 
@@ -216,7 +209,7 @@ impl Pile {
         direction: Direction,
         sequence: &[(char, usize, usize)],
         collector: &mut Vec<(char, usize, usize)>,
-        matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
+        matches: &mut Matches,
     ) {
         for block_repr in sequence {
             if let Some(previous_match) = collector.last() {
@@ -233,7 +226,7 @@ impl Pile {
         direction: Direction,
         sequence: &[(char, usize, usize)],
         collector: &mut Vec<(char, usize, usize)>,
-        matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
+        matches: &mut Matches,
     ) {
         for block_repr in sequence {
             if block_repr.0 == NO_BLOCK_CODE {
@@ -253,15 +246,18 @@ impl Pile {
     fn take_match_from_collector(
         direction: Direction,
         collector: &mut Vec<(char, usize, usize)>,
-        matches: &mut HashMap<Direction, Vec<Vec<(usize, usize)>>>,
+        matches: &mut Matches,
     ) {
         if collector.len() >= 3 {
             let vec_of_matches = matches.entry(direction).or_insert_with(Vec::new);
+
+            let match_color = Factory::get_block_color_by_code(collector[0].0);
             let r#match = collector
                 .iter()
-                .map(|block_repr| (block_repr.1, block_repr.2))
-                .collect::<Vec<(usize, usize)>>();
-            vec_of_matches.push(r#match);
+                .map(|block_repr| [block_repr.1, block_repr.2])
+                .collect();
+
+            vec_of_matches.push((match_color, r#match));
         }
         collector.clear();
     }
@@ -269,23 +265,23 @@ impl Pile {
 
     pub fn extract_matching_blocks(
         &mut self,
-        unique_match_positions: &HashSet<(usize, usize)>,
+        unique_match_positions: &HashSet<[usize; 2]>,
     ) -> Vec<Block> {
         let mut matched_blocks = Vec::with_capacity(unique_match_positions.len());
-        for m in unique_match_positions {
-            let block = mem::take(&mut self.matrix[m.0][m.1]);
+        for pos_idxs in unique_match_positions {
+            let block = mem::take(&mut self.matrix[pos_idxs[0]][pos_idxs[1]]);
             #[allow(clippy::unwrap_used)]
             matched_blocks.push(block.unwrap());
         }
         matched_blocks
     }
 
-    pub fn remove_matches(&mut self, matches: &HashSet<(usize, usize)>) -> bool {
+    pub fn remove_matches(&mut self, matches: &HashSet<[usize; 2]>) -> bool {
         // COLLECT A MAP OF ROW (VERTICAL) INDEXES OF MATCHED BLOCKS BY COLUMN (HORIZONTAL) INDEX
         let mut matched_blocks_row_idxs_by_col_idx = HashMap::new();
-        for m in matches {
-            let col_idx = m.0;
-            let row_idx = m.1;
+        for pos_idxs in matches {
+            let col_idx = pos_idxs[0];
+            let row_idx = pos_idxs[1];
 
             let row_idxs = matched_blocks_row_idxs_by_col_idx
                 .entry(col_idx)
