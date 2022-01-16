@@ -12,6 +12,8 @@ use crate::constants::APP_NAME;
 **** SCORING
 *******************************************************************************/
 pub struct Scoring {
+    pub combo: usize,
+
     pub score: usize,
 
     pub maxcombo: usize,
@@ -29,6 +31,7 @@ impl Scoring {
 
     pub fn new(highscore: usize) -> Self {
         Self {
+            combo: 0,
             score: 0,
             maxcombo: 0,
             is_new_maxcombo: false,
@@ -83,25 +86,25 @@ impl Scoring {
         (num_of_matching_blocks, num_of_sequential_matchings): (&Vec<usize>, usize),
     ) {
         // SCORE
-        let mut combo = 0;
+        self.combo = 0;
         for num_matches in num_of_matching_blocks {
-            let bonus_length = num_matches - 3;
             let mut bonus_points = 0;
+            let bonus_length = num_matches - 3;
             if bonus_length > 0 {
                 for bonus_point in 2..bonus_length + 2 {
                     bonus_points += bonus_point;
                 }
             }
             let points_per_match = 3 + bonus_points;
-            combo += points_per_match;
+            self.combo += points_per_match;
         }
-        combo = combo * num_of_matching_blocks.len() * num_of_sequential_matchings;
-        self.score += combo;
+        self.combo = self.combo * num_of_matching_blocks.len() * num_of_sequential_matchings;
+        self.score += self.combo;
         // MAX COMBO
         if num_of_sequential_matchings == 1 {
             self.maxcombo_accumulator = 0;
         }
-        self.maxcombo_accumulator += combo;
+        self.maxcombo_accumulator += self.combo;
         self.is_new_maxcombo = false;
         if self.maxcombo_accumulator > self.maxcombo {
             self.maxcombo = self.maxcombo_accumulator;

@@ -41,9 +41,9 @@ struct HudLabels {
 
 impl HudLabels {
     pub fn new(resources: &Resources) -> Self {
-        let fonts: &Fonts = resources.get_fonts();
-        let font_extra_bold = fonts.get_extra_bold();
-        let font_semi_bold = fonts.get_semi_bold();
+        let fonts: Fonts = resources.get_fonts();
+        let font_extra_bold = fonts.extra_bold;
+        let font_semi_bold = fonts.semi_bold;
 
         let navigation_instructions = resources.get_navigation_instructions();
 
@@ -127,7 +127,7 @@ pub struct Hud {
 
 impl Hud {
     pub fn new(resources: &Resources) -> Self {
-        let font_semi_bold = resources.get_fonts().get_semi_bold();
+        let font_semi_bold = resources.get_fonts().semi_bold;
         Self {
             labels: HudLabels::new(resources),
 

@@ -30,7 +30,7 @@ pub struct HowToPlay {
 
 impl HowToPlay {
     pub fn new(resources: &Resources) -> Self {
-        let font = resources.get_fonts().get_semi_bold();
+        let font = resources.get_fonts().semi_bold;
 
         let controls_leftside_str = "\n\
             Right:\n\

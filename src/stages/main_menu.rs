@@ -154,7 +154,7 @@ impl MainMenu {
     pub const ITEMS: [Stage; 3] = [Stage::Playing, Stage::HowToPlay, Stage::About];
 
     pub fn new(resources: &Resources, ctx: &mut Context) -> Self {
-        let font = resources.get_fonts().get_extra_bold();
+        let font = resources.get_fonts().extra_bold;
         let item_labels = ItemLabels::new(font);
 
         let item_widths = [

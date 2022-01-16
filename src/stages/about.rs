@@ -24,7 +24,7 @@ pub struct About {
 
 impl About {
     pub fn new(resources: &Resources) -> Self {
-        let font = resources.get_fonts().get_semi_bold();
+        let font = resources.get_fonts().semi_bold;
 
         let about_str = "\n\
             This game is a remake of\n\

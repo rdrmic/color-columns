@@ -4,9 +4,9 @@ use crate::app::log_error;
 
 #[derive(Clone, Copy)]
 pub struct Fonts {
-    extra_bold: Font,
-    semi_bold: Font,
-    light_italic: Font,
+    pub extra_bold: Font,
+    pub semi_bold: Font,
+    pub light_italic: Font,
 }
 
 impl Fonts {
@@ -26,17 +26,5 @@ impl Fonts {
                 panic!("{}", &error);
             }
         }
-    }
-
-    pub const fn get_extra_bold(&self) -> Font {
-        self.extra_bold
-    }
-
-    pub const fn get_semi_bold(&self) -> Font {
-        self.semi_bold
-    }
-
-    pub const fn get_light_italic(&self) -> Font {
-        self.light_italic
     }
 }

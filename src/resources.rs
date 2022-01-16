@@ -12,12 +12,12 @@ impl Resources {
         let fonts = Fonts::load(ctx);
         Self {
             fonts,
-            navigation_instructions: NavigationInstructions::new(fonts.get_light_italic()),
+            navigation_instructions: NavigationInstructions::new(fonts.light_italic),
         }
     }
 
-    pub const fn get_fonts(&self) -> &Fonts {
-        &self.fonts
+    pub const fn get_fonts(&self) -> Fonts {
+        self.fonts
     }
 
     pub const fn get_navigation_instructions(&self) -> &NavigationInstructions {

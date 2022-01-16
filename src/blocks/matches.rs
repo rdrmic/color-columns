@@ -1,13 +1,17 @@
 use std::collections::HashSet;
 
 use ggez::{
-    graphics::{self, Color, DrawParam, Mesh},
+    graphics::{self, Color, DrawParam, Font, Mesh, PxScale, Text, TextFragment},
     mint::Point2,
     Context, GameResult,
 };
 
 use crate::{
-    blocks::idx_pair_to_center_point_of_block, constants::NUM_TICKS_SEQUENCE_FOR_MATCHES_REMOVAL,
+    blocks::idx_pair_to_center_point_of_block,
+    constants::{
+        MATCH_COMBO_POINTS_CHAR_SCALE, MATCH_DIRECTION_INDICATOR_WIDTH,
+        NUM_TICKS_SEQUENCE_FOR_MATCHES_REMOVAL,
+    },
 };
 
 use super::{
@@ -31,10 +35,11 @@ pub struct Matching {
 
     num_of_matching_blocks: Vec<usize>,
     match_direction_indicators: Vec<(Color, [Point2<f32>; 2])>,
-    unique_match_indexes: HashSet<[usize; 2]>,
+    unique_matching_blocks_indexes: HashSet<[usize; 2]>,
     blocks: Vec<Block>,
 
     blinking_animation_stage: usize,
+    pub combo_points_animation_started: bool,
 }
 
 impl Matching {
@@ -47,10 +52,11 @@ impl Matching {
 
             num_of_matching_blocks,
             match_direction_indicators,
-            unique_match_indexes,
+            unique_matching_blocks_indexes: unique_match_indexes,
             blocks,
 
             blinking_animation_stage: 0,
+            combo_points_animation_started: false,
         }
     }
 
@@ -62,7 +68,7 @@ impl Matching {
 
         self.num_of_matching_blocks = num_of_matching_blocks;
         self.match_direction_indicators = match_direction_indicators;
-        self.unique_match_indexes = unique_match_indexes;
+        self.unique_matching_blocks_indexes = unique_match_indexes;
         self.blocks = blocks;
 
         self.blinking_animation_stage = 0;
@@ -113,8 +119,8 @@ impl Matching {
     }
 
     #[inline]
-    pub fn get_unique_match_indexes(&self) -> &HashSet<[usize; 2]> {
-        &self.unique_match_indexes
+    pub fn get_unique_matching_blocks_indexes(&self) -> &HashSet<[usize; 2]> {
+        &self.unique_matching_blocks_indexes
     }
 
     // TODO remove
@@ -123,11 +129,11 @@ impl Matching {
         self.num_of_sequential_matchings
     }*/
 
-    pub fn blinking_animation(&mut self, num_frames: usize) -> bool {
+    pub fn blinking_animation(&mut self, num_frames: usize) -> usize {
         if num_frames % NUM_TICKS_SEQUENCE_FOR_MATCHES_REMOVAL[self.blinking_animation_stage] == 0 {
             self.blinking_animation_stage += 1;
         }
-        self.blinking_animation_stage > 3
+        self.blinking_animation_stage
     }
 
     pub fn get_blocks(&self) -> Vec<Block> {
@@ -141,10 +147,215 @@ impl Matching {
             }
         } else {
             for (color, points) in &self.match_direction_indicators {
-                let line_mesh = Mesh::new_line(ctx, points, 2.0, *color)?;
+                let line_mesh =
+                    Mesh::new_line(ctx, points, MATCH_DIRECTION_INDICATOR_WIDTH, *color)?;
                 graphics::draw(ctx, &line_mesh, DrawParam::default())?;
             }
         }
+        Ok(())
+    }
+}
+
+/*******************************************************************************
+**** COMBO POINTS ANIMATION
+*******************************************************************************/
+pub struct ComboPointsAnimationsHolder {
+    font: Font,
+    pub current_animations: Vec<ComboPointsAnimation>,
+}
+
+impl ComboPointsAnimationsHolder {
+    pub fn new(font: Font) -> Self {
+        Self {
+            font,
+            current_animations: Vec::with_capacity(5),
+        }
+    }
+
+    pub fn start_new_animation(
+        &mut self,
+        points: usize,
+        matching_blocks_indexes: &HashSet<[usize; 2]>,
+    ) {
+        let starting_position =
+            Self::calculate_animation_starting_position(matching_blocks_indexes);
+        let new_animation = ComboPointsAnimation::new(points, starting_position, self.font);
+        self.current_animations.push(new_animation);
+    }
+
+    fn calculate_animation_starting_position(
+        matching_blocks_indexes: &HashSet<[usize; 2]>,
+    ) -> Point2<f32> {
+        #[allow(clippy::unwrap_used)]
+        let highest_y_idx = matching_blocks_indexes
+            .iter()
+            .map(|point| point[1])
+            .reduce(|accum, item| if accum >= item { accum } else { item })
+            .unwrap();
+        #[allow(clippy::unwrap_used)]
+        let highest_rightmost_idx_pair = matching_blocks_indexes
+            .iter()
+            .filter(|point| point[1] == highest_y_idx)
+            .reduce(|accum, item| if accum[0] >= item[0] { accum } else { item })
+            .unwrap();
+
+        idx_pair_to_center_point_of_block(highest_rightmost_idx_pair)
+    }
+
+    pub fn update_animations(&mut self) {
+        if !self.current_animations.is_empty() {
+            //println!("NUM ANIMATIONS: {}", self.current_animations.len());
+            let mut idx_of_finished_animation = None;
+            for idx in 0..self.current_animations.len() {
+                let is_over = self.current_animations[idx].update();
+                if is_over {
+                    idx_of_finished_animation = Some(idx);
+                }
+            }
+            if let Some(idx_of_finished_animation) = idx_of_finished_animation {
+                /*println!(
+                    "---- removing animation with idx {}",
+                    idx_of_finished_animation
+                );*/
+                self.current_animations
+                    .swap_remove(idx_of_finished_animation);
+            }
+        }
+    }
+
+    pub fn draw_animations(&mut self, ctx: &mut Context) -> GameResult {
+        if !self.current_animations.is_empty() {
+            for animation in &mut self.current_animations {
+                animation.draw(ctx)?;
+            }
+        }
+        Ok(())
+    }
+
+    pub fn reset(&mut self) {
+        self.current_animations.clear();
+    }
+}
+
+#[derive(Debug)]
+pub struct ComboPointsAnimation {
+    points: usize,
+    position: Point2<f32>,
+    font: Font,
+    bckg_color: Color,
+    color: Color,
+    alpha: f32,
+}
+
+impl ComboPointsAnimation {
+    pub fn new(points: usize, position: Point2<f32>, font: Font) -> Self {
+        Self {
+            points,
+            position,
+            font,
+            bckg_color: Color::BLACK,
+            color: Color::WHITE,
+            alpha: 1.0,
+        }
+    }
+
+    pub fn update(&mut self) -> bool {
+        /*println!(
+            "\n*** UPDATE ANIMATION: {} // {:?}",
+            self.points, self.position
+        );*/
+
+        self.position.x += 0.05;
+        self.position.y -= 0.6;
+
+        self.bckg_color.a = self.alpha;
+        self.color.a = self.alpha;
+        if self.alpha <= 0.0 {
+            return true;
+        }
+        self.alpha -= 0.016;
+        false
+    }
+
+    pub fn draw(&mut self, ctx: &mut Context) -> GameResult {
+        /*println!(
+            "*** DRAW ANIMATION: {:?} - {:?} \t// next alpha: {}\n",
+            self.bckg_color, self.color, self.alpha
+        );*/
+
+        // OUTLINE
+        let points_bckg = Text::new(TextFragment {
+            text: self.points.to_string(),
+            color: Some(self.bckg_color),
+            font: Some(self.font),
+            scale: Some(PxScale::from(MATCH_COMBO_POINTS_CHAR_SCALE)),
+        });
+        let bckg_offset = 1.5;
+        let mut bckg_position;
+        // up
+        bckg_position = Point2 {
+            x: self.position.x,
+            y: self.position.y - bckg_offset,
+        };
+        graphics::queue_text(ctx, &points_bckg, bckg_position, None);
+        // upper-right corner
+        bckg_position = Point2 {
+            x: self.position.x + bckg_offset,
+            y: self.position.y - bckg_offset,
+        };
+        graphics::queue_text(ctx, &points_bckg, bckg_position, None);
+        // right
+        bckg_position = Point2 {
+            x: self.position.x + bckg_offset,
+            y: self.position.y,
+        };
+        graphics::queue_text(ctx, &points_bckg, bckg_position, None);
+        // lower-right corner
+        bckg_position = Point2 {
+            x: self.position.x + bckg_offset,
+            y: self.position.y + bckg_offset,
+        };
+        graphics::queue_text(ctx, &points_bckg, bckg_position, None);
+        // down
+        bckg_position = Point2 {
+            x: self.position.x,
+            y: self.position.y + bckg_offset,
+        };
+        graphics::queue_text(ctx, &points_bckg, bckg_position, None);
+        // lower-left corner
+        bckg_position = Point2 {
+            x: self.position.x - bckg_offset,
+            y: self.position.y + bckg_offset,
+        };
+        graphics::queue_text(ctx, &points_bckg, bckg_position, None);
+        // left
+        bckg_position = Point2 {
+            x: self.position.x - bckg_offset,
+            y: self.position.y,
+        };
+        graphics::queue_text(ctx, &points_bckg, bckg_position, None);
+        // upper-left corner
+        bckg_position = Point2 {
+            x: self.position.x - bckg_offset,
+            y: self.position.y - bckg_offset,
+        };
+        graphics::queue_text(ctx, &points_bckg, bckg_position, None);
+
+        let points = Text::new(TextFragment {
+            text: self.points.to_string(),
+            color: Some(self.color),
+            font: Some(self.font),
+            scale: Some(PxScale::from(MATCH_COMBO_POINTS_CHAR_SCALE)),
+        });
+        graphics::queue_text(ctx, &points, self.position, None);
+
+        graphics::draw_queued_text(
+            ctx,
+            DrawParam::default(),
+            None,
+            graphics::FilterMode::Linear,
+        )?;
+
         Ok(())
     }
 }

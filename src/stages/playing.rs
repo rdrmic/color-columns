@@ -8,13 +8,13 @@ use self::scoring::Scoring;
 
 use super::{Stage, StageTrait};
 use crate::blocks::cargo::Cargo;
-use crate::blocks::matches::Matching;
+use crate::blocks::matches::{ComboPointsAnimationsHolder, Matching};
 use crate::blocks::pile::Pile;
 use crate::blocks::{Block, Factory};
 use crate::constants::{
     COLOR_GRAY, GAME_ARENA_RECT, NUM_DESCENDED_CARGOES_GAMEPLAY_ACCELERATION,
     NUM_TICKS_FOR_PAUSED_BLOCKS_SHUFFLE, NUM_TICKS_GAMEPLAY_ACCELERATION_LIMIT,
-    STARTING_NUM_TICKS_FOR_CARGO_DESCENT,
+    NUM_TICKS_SEQUENCE_FOR_MATCHES_REMOVAL, STARTING_NUM_TICKS_FOR_CARGO_DESCENT,
 };
 use crate::input::Event;
 use crate::resources::Resources;
@@ -93,6 +93,7 @@ pub struct Playing {
     num_descended_cargoes: usize,
     pile: Pile,
     matching: Option<Matching>,
+    combo_points_animations: ComboPointsAnimationsHolder,
     scoring: Scoring,
     paused_blocks: Option<Vec<Block>>,
     playing_state_when_paused: Option<PlayingState>,
@@ -148,7 +149,10 @@ impl Playing {
             is_descending_over: false,
             num_descended_cargoes: 0,
             pile,
-            matching,                 // FIXME matching: None,
+            matching, // FIXME matching: None,
+            combo_points_animations: ComboPointsAnimationsHolder::new(
+                resources.get_fonts().semi_bold,
+            ),
             scoring: Scoring::new(0), // FIXME refactor
             paused_blocks: None,
             playing_state_when_paused: None,
@@ -179,6 +183,7 @@ impl Playing {
 
         self.pile = Pile::new();
         self.matching = None;
+        self.combo_points_animations.reset();
 
         self.paused_blocks = None;
         self.playing_state_when_paused = None;
@@ -399,11 +404,21 @@ impl Playing {
         }
 
         if let Some(matching) = self.matching.as_mut() {
-            let is_animation_over = matching.blinking_animation(self.num_frames);
-            if is_animation_over {
+            let blinking_animation_stage = matching.blinking_animation(self.num_frames);
+            if blinking_animation_stage == 3 && !matching.combo_points_animation_started {
+                // START COMBO POINTS ANIMATION
+                self.scoring
+                    .update_from_matches(matching.get_scoring_data());
+                self.combo_points_animations.start_new_animation(
+                    self.scoring.combo,
+                    matching.get_unique_matching_blocks_indexes(),
+                );
+                matching.combo_points_animation_started = true;
+            } else if blinking_animation_stage > NUM_TICKS_SEQUENCE_FOR_MATCHES_REMOVAL.len() - 1 {
+                // BLINKING ANIMATION IS OVER, REMOVING THE MATCHES
                 let is_pile_full = self
                     .pile
-                    .remove_matches(matching.get_unique_match_indexes());
+                    .remove_matches(matching.get_unique_matching_blocks_indexes());
 
                 /*println!(
                     "AFTER REMOVAL (sequential matchings: {}):",
@@ -411,8 +426,6 @@ impl Playing {
                 );
                 self.pile.__print();*/
 
-                self.scoring
-                    .update_from_matches(matching.get_scoring_data());
                 self.hud.update_scoring(&self.scoring);
 
                 let next_matches = self.pile.search_for_matches();
@@ -431,11 +444,12 @@ impl Playing {
                     //println!("\n>>> {:?}", next_matches);
                     matching.new_chained_match(&next_matches, &mut self.pile);
 
+                    matching.combo_points_animation_started = false;
                     self.num_frames = 0; // TODO needed?
                 }
             }
-        // for REPLAY FROM SNAPSHOT --> FIXME remove when the game is finished
         } else {
+            // for REPLAY FROM SNAPSHOT --> FIXME remove when the game is finished
             self.playing_state = Some(PlayingState::DescendingCargo);
             //println!("PlayingState::DescendingCargo =>");
             self.num_frames = 0;
@@ -518,6 +532,7 @@ impl StageTrait for Playing {
         if let Some(PlayingState::DescendingCargo | PlayingState::HandlingMatches) =
             self.playing_state
         {
+            self.combo_points_animations.update_animations();
             self.hud.update_game_info();
         }
         Ok(Some(Stage::Playing))
@@ -526,7 +541,6 @@ impl StageTrait for Playing {
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         self.hud.draw(ctx)?;
         self.game_arena.draw(ctx)?;
-
         if let Some(paused_blocks) = self.paused_blocks.as_deref_mut() {
             for block in paused_blocks {
                 block.draw(ctx)?;
@@ -542,8 +556,8 @@ impl StageTrait for Playing {
             if let Some(matching) = &mut self.matching {
                 matching.draw(ctx)?;
             }
+            self.combo_points_animations.draw_animations(ctx)?;
         }
-
         Ok(())
     }
 }

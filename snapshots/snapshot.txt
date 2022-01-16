@@ -14,5 +14,5 @@
 . . . . . . . . .
 . . . . . . . . .
 G G . O O . R R .
-y y . R R . B B .
+Y Y . R R . B B .
 O O . G G . M M .
