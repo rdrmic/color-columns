@@ -6,7 +6,7 @@ VERSION     DATE                SIZE-CODE       SIZE-EXE        SIZE-DIST
     - Running .exe without spawning a console window // #17
     - Window positioning (temporary) disabled (#5)
 0.1.2       20.12.2021          90,1 KB         3,30 MB         4,12 MB
-    - Improved "How to play" and "Credits" screens // #3
+    - Improved "How to play" and "About" screens // #3
 0.1.3       21.12.2021          90,4 KB         3,30 MB         4,12 MB
     - BUGFIX: Glitch on starting new game when entering from main menu // #6
     - BUGFIX: Newest higscore is not shown when reinitializing gameplay from main menu  // #15
@@ -17,3 +17,22 @@ VERSION     DATE                SIZE-CODE       SIZE-EXE        SIZE-DIST
     - Accelerating gameplay gradually // #12
 0.1.6       30.12.2021          98,2 KB         3,32 MB         4,14 MB
     - Accelerating gameplay gradually: on-screen info for the speedups and max speed reached // #12
+0.1.7       16.01.2022         114,0 KB         3,60 MB         4,42 MB
+    - Refactored with warn(clippy::all, clippy::pedantic) // closes #18
+    - Refactored with clippy's "nursery", "cargo" and some of the "restriction" lints
+    - Improved initial window creating // fixes #5
+    - Create console-free executable only on release builds // fixes #17
+    - Improved block colors
+    - Improved matching animation
+    - Persist highscore on quitting (w/o game over) // closes #20
+    - draw() methods return GameResult; catching ggez framework errors
+    - Error logging; using GameResult throughout the app // closes #11
+    - Screen "Credits" > "About"
+    - App version moved from title bar to "About" screen
+    - Line delimiter between "How to play" sections
+    - Added window icon // closes #19
+    - Added .exe icon & build script; enriched Cargo.toml
+    - Added built-time and optional "dev" mark to version in "About" screen
+    - warn(clippy::unwrap_used) // closes #11
+    - Matching indicator lines are same color as matching blocks
+    - Hit points (combo) animation // closes #8
