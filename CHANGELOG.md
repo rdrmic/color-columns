@@ -36,3 +36,4 @@ VERSION     DATE                SIZE-CODE       SIZE-EXE        SIZE-DIST
     - warn(clippy::unwrap_used) // closes #11
     - Matching indicator lines are same color as matching blocks
     - Hit points (combo) animation // closes #8
+    - Improved matching animation and score calculation

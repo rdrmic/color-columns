@@ -12,13 +12,11 @@ use crate::constants::APP_NAME;
 **** SCORING
 *******************************************************************************/
 pub struct Scoring {
-    pub combo: usize,
-
     pub score: usize,
 
     pub maxcombo: usize,
     pub is_new_maxcombo: bool,
-    maxcombo_accumulator: usize,
+    pub maxcombo_accumulator: usize,
 
     pub highscore: usize,
     pub is_new_highscore: bool,
@@ -31,7 +29,6 @@ impl Scoring {
 
     pub fn new(highscore: usize) -> Self {
         Self {
-            combo: 0,
             score: 0,
             maxcombo: 0,
             is_new_maxcombo: false,
@@ -83,28 +80,32 @@ impl Scoring {
 
     pub fn update_from_matches(
         &mut self,
-        (num_of_matching_blocks, num_of_sequential_matchings): (&Vec<usize>, usize),
+        (matches_amounts_of_blocks, num_of_sequential_matchings): (&Vec<usize>, usize),
     ) {
         // SCORE
-        self.combo = 0;
-        for num_matches in num_of_matching_blocks {
+        let mut hit = 0;
+        for num_of_matching_blocks in matches_amounts_of_blocks {
             let mut bonus_points = 0;
-            let bonus_length = num_matches - 3;
-            if bonus_length > 0 {
-                for bonus_point in 2..bonus_length + 2 {
-                    bonus_points += bonus_point;
+            let bonus_amount = num_of_matching_blocks - 3;
+            if bonus_amount > 0 {
+                for bonus_point in 0..bonus_amount {
+                    bonus_points += bonus_point + 2;
                 }
             }
-            let points_per_match = 3 + bonus_points;
-            self.combo += points_per_match;
+            hit += 3 + bonus_points;
         }
-        self.combo = self.combo * num_of_matching_blocks.len() * num_of_sequential_matchings;
-        self.score += self.combo;
+        let sequential_matchings_multiplier = if num_of_sequential_matchings > 1 {
+            num_of_sequential_matchings + 1
+        } else {
+            num_of_sequential_matchings
+        };
+        hit = hit * matches_amounts_of_blocks.len() * sequential_matchings_multiplier;
+        self.score += hit;
         // MAX COMBO
         if num_of_sequential_matchings == 1 {
             self.maxcombo_accumulator = 0;
         }
-        self.maxcombo_accumulator += self.combo;
+        self.maxcombo_accumulator += hit;
         self.is_new_maxcombo = false;
         if self.maxcombo_accumulator > self.maxcombo {
             self.maxcombo = self.maxcombo_accumulator;

@@ -404,28 +404,24 @@ impl Playing {
         }
 
         if let Some(matching) = self.matching.as_mut() {
-            let blinking_animation_stage = matching.blinking_animation(self.num_frames);
-            if blinking_animation_stage == 3 && !matching.combo_points_animation_started {
-                // START COMBO POINTS ANIMATION
-                self.scoring
-                    .update_from_matches(matching.get_scoring_data());
-                self.combo_points_animations.start_new_animation(
-                    self.scoring.combo,
-                    matching.get_unique_matching_blocks_indexes(),
-                );
-                matching.combo_points_animation_started = true;
-            } else if blinking_animation_stage > NUM_TICKS_SEQUENCE_FOR_MATCHES_REMOVAL.len() - 1 {
-                // BLINKING ANIMATION IS OVER, REMOVING THE MATCHES
+            if self.num_frames
+                % NUM_TICKS_SEQUENCE_FOR_MATCHES_REMOVAL[matching.blinking_animation_stage]
+                == 0
+            {
+                matching.blinking_animation_stage += 1;
+                self.num_frames = 0;
+            }
+            if matching.blinking_animation_stage > NUM_TICKS_SEQUENCE_FOR_MATCHES_REMOVAL.len() - 1
+            {
                 let is_pile_full = self
                     .pile
                     .remove_matches(matching.get_unique_matching_blocks_indexes());
-
-                /*println!(
-                    "AFTER REMOVAL (sequential matchings: {}):",
-                    matching.get_num_of_sequential_matchings()
+                self.scoring
+                    .update_from_matches(matching.get_scoring_data());
+                self.combo_points_animations.start_new_animation(
+                    self.scoring.maxcombo_accumulator,
+                    matching.get_unique_matching_blocks_indexes(),
                 );
-                self.pile.__print();*/
-
                 self.hud.update_scoring(&self.scoring);
 
                 let next_matches = self.pile.search_for_matches();
@@ -437,16 +433,13 @@ impl Playing {
                     } else {
                         self.playing_state = Some(PlayingState::DescendingCargo);
                         //println!("PlayingState::DescendingCargo =>");
-                        self.num_frames = 0;
                     }
                     self.matching = None;
                 } else {
                     //println!("\n>>> {:?}", next_matches);
                     matching.new_chained_match(&next_matches, &mut self.pile);
-
-                    matching.combo_points_animation_started = false;
-                    self.num_frames = 0; // TODO needed?
                 }
+                self.num_frames = 0;
             }
         } else {
             // for REPLAY FROM SNAPSHOT --> FIXME remove when the game is finished

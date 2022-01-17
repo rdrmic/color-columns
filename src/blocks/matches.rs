@@ -8,10 +8,7 @@ use ggez::{
 
 use crate::{
     blocks::idx_pair_to_center_point_of_block,
-    constants::{
-        MATCH_COMBO_POINTS_CHAR_SCALE, MATCH_DIRECTION_INDICATOR_WIDTH,
-        NUM_TICKS_SEQUENCE_FOR_MATCHES_REMOVAL,
-    },
+    constants::{MATCH_COMBO_POINTS_CHAR_SCALE, MATCH_DIRECTION_INDICATOR_WIDTH},
 };
 
 use super::{
@@ -38,8 +35,7 @@ pub struct Matching {
     unique_matching_blocks_indexes: HashSet<[usize; 2]>,
     blocks: Vec<Block>,
 
-    blinking_animation_stage: usize,
-    pub combo_points_animation_started: bool,
+    pub blinking_animation_stage: usize,
 }
 
 impl Matching {
@@ -56,7 +52,6 @@ impl Matching {
             blocks,
 
             blinking_animation_stage: 0,
-            combo_points_animation_started: false,
         }
     }
 
@@ -128,13 +123,6 @@ impl Matching {
     pub fn get_num_of_sequential_matchings(&self) -> usize {
         self.num_of_sequential_matchings
     }*/
-
-    pub fn blinking_animation(&mut self, num_frames: usize) -> usize {
-        if num_frames % NUM_TICKS_SEQUENCE_FOR_MATCHES_REMOVAL[self.blinking_animation_stage] == 0 {
-            self.blinking_animation_stage += 1;
-        }
-        self.blinking_animation_stage
-    }
 
     pub fn get_blocks(&self) -> Vec<Block> {
         self.blocks.clone()

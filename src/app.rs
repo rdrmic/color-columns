@@ -152,7 +152,12 @@ impl App {
 
 impl EventHandler<GameError> for App {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
+        //let mut repeated_update_frame_count = 0;
         while ggez::timer::check_update_time(ctx, FPS) {
+            /*repeated_update_frame_count += 1;
+            if repeated_update_frame_count > 1 {
+                println!("....");
+            }*/
             let user_input = mem::take(&mut self.input_event);
             if let Some(stage_from_update) = self.get_currrent_stage().update(user_input)? {
                 self.current_stage = stage_from_update;
