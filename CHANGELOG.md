@@ -17,7 +17,7 @@ VERSION     DATE                SIZE-CODE       SIZE-EXE        SIZE-DIST
     - Accelerating gameplay gradually // #12
 0.1.6       30.12.2021          98,2 KB         3,32 MB         4,14 MB
     - Accelerating gameplay gradually: on-screen info for the speedups and max speed reached // #12
-0.1.7       16.01.2022         114,0 KB         3,60 MB         4,42 MB
+0.1.7       16.01.2022         113,0 KB         3,60 MB         4,42 MB
     - Refactored with warn(clippy::all, clippy::pedantic) // closes #18
     - Refactored with clippy's "nursery", "cargo" and some of the "restriction" lints
     - Improved initial window creating // fixes #5
