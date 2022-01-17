@@ -108,14 +108,17 @@ impl Playing {
         let mut blocks_factory = Factory::new();
         let mut next_cargo = None;
         let mut pile = Pile::new();
-
         let mut matching = None; // FIXME remove
+        let mut highscore = 0;
+        let mut hud = Hud::new(resources);
 
         let args: Vec<String> = env::args().skip(1).collect();
         if args.len() == 1 && args[0] == "replay" {
             playing_state = Some(PlayingState::HandlingMatches);
             next_cargo = Some(blocks_factory.create_next_cargo());
             pile = snapshot::create_pile_from_file();
+            highscore = Scoring::load_highscore();
+            hud.new_game(highscore);
 
             // FIXME remove
             //println!("/// pile.search_for_matches() ...");
@@ -131,13 +134,13 @@ impl Playing {
             //
 
             println!("*** REPLAYING FROM SNAPSHOT ***");
-            println!("=> PlayingState::HandlingMatches");
+            println!("=> PlayingState::HandlingMatches\n");
         } /* else {
               println!("=> PlayingState::Ready");
           }*/
 
         Self {
-            hud: Hud::new(resources),
+            hud,
             game_arena: GameArena::new(),
             playing_state,
             num_frames: 0,
@@ -153,7 +156,7 @@ impl Playing {
             combo_points_animations: ComboPointsAnimationsHolder::new(
                 resources.get_fonts().semi_bold,
             ),
-            scoring: Scoring::new(0), // FIXME refactor
+            scoring: Scoring::new(highscore), // FIXME refactor
             paused_blocks: None,
             playing_state_when_paused: None,
             game_info_when_paused: None,
@@ -165,7 +168,6 @@ impl Playing {
     fn new_game(&mut self) {
         //println!("Playing.new_game()");
         let highscore = Scoring::load_highscore();
-
         self.scoring = Scoring::new(highscore);
 
         self.hud.new_game(highscore);
