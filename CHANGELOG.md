@@ -17,7 +17,7 @@ VERSION     DATE                SIZE-CODE       SIZE-EXE        SIZE-DIST
     - Accelerating gameplay gradually // #12
 0.1.6       30.12.2021          98,2 KB         3,32 MB         4,14 MB
     - Accelerating gameplay gradually: on-screen info for the speedups and max speed reached // #12
-0.1.7       16.01.2022         113,0 KB         3,60 MB         4,42 MB
+0.1.7       26.01.2022         115,0 KB         3,62 MB         4,44 MB
     - Refactored with warn(clippy::all, clippy::pedantic) // closes #18
     - Refactored with clippy's "nursery", "cargo" and some of the "restriction" lints
     - Improved initial window creating // fixes #5
@@ -37,3 +37,7 @@ VERSION     DATE                SIZE-CODE       SIZE-EXE        SIZE-DIST
     - Matching indicator lines are same color as matching blocks
     - Hit points (combo) animation // closes #8
     - Improved matching animation and score calculation
+    - Show highscore in replay mode
+    - Improved hit points animation
+    - Eased game-over conditions
+    - Improved navigation instructions
