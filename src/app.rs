@@ -159,7 +159,7 @@ impl EventHandler<GameError> for App {
                 println!("....");
             }*/
             let user_input = mem::take(&mut self.input_event);
-            if let Some(stage_from_update) = self.get_currrent_stage().update(user_input)? {
+            if let Some(stage_from_update) = self.get_currrent_stage().update(ctx, user_input)? {
                 self.current_stage = stage_from_update;
             } else {
                 event::quit(ctx);
@@ -203,7 +203,9 @@ impl EventHandler<GameError> for App {
 
     fn quit_event(&mut self, ctx: &mut Context) -> bool {
         if let Stage::Playing = self.current_stage {
-            let result = self.get_currrent_stage().update(Event::SaveScoreOnQuit);
+            let result = self
+                .get_currrent_stage()
+                .update(ctx, Event::SaveScoreOnQuit);
             if let Err(error) = result {
                 self.on_error(ctx, ErrorOrigin::Update, error);
             }

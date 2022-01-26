@@ -288,6 +288,7 @@ impl Playing {
         self.pile = Pile::new();
         self.paused_blocks = None;
         self.matching = None;
+        self.combo_points_animations.reset();
     }
 
     /*** UPDATE'S PLAYING STATE VARIANTS [BEGIN] ***/
@@ -372,33 +373,29 @@ impl Playing {
                 let num_of_remaining_places_in_column = self
                     .pile
                     .take_cargo(&mem::take(&mut self.descending_cargo).unwrap());
-                if num_of_remaining_places_in_column < 0 {
-                    self.game_over();
-                    //println!("PlayingState::GameOver =>");
-                } else {
-                    let matches = self.pile.search_for_matches();
-                    if matches.is_empty() {
-                        if num_of_remaining_places_in_column == 0 {
-                            self.game_over();
-                            //println!("PlayingState::GameOver =>");
-                        }
-                    } else {
-                        //println!("\n>>> {:?}", matches);
-                        //self.pile.__print();
-                        //println!("-----------------------------------\n");
 
-                        self.matching = Some(Matching::new(&matches, &mut self.pile));
-
-                        self.playing_state = Some(PlayingState::HandlingMatches);
-                        //println!("PlayingState::HandlingMatches =>");
-                        self.num_frames = 0;
+                let matches = self.pile.search_for_matches();
+                if matches.is_empty() {
+                    if num_of_remaining_places_in_column <= 0 {
+                        self.game_over();
+                        //println!("PlayingState::GameOver =>");
                     }
+                } else {
+                    //println!("\n>>> {:?}", matches);
+                    //self.pile.__print();
+                    //println!("-----------------------------------\n");
+
+                    self.matching = Some(Matching::new(&matches, &mut self.pile));
+
+                    self.playing_state = Some(PlayingState::HandlingMatches);
+                    //println!("PlayingState::HandlingMatches =>");
+                    self.num_frames = 0;
                 }
             }
         }
     }
 
-    fn update_state_handling_matches(&mut self, input_event: &Event) {
+    fn update_state_handling_matches(&mut self, ctx: &Context, input_event: &Event) {
         self.num_frames += 1;
         if let Event::Escape | Event::LostFocus = input_event {
             self.pause();
@@ -421,6 +418,7 @@ impl Playing {
                 self.scoring
                     .update_from_matches(matching.get_scoring_data());
                 self.combo_points_animations.start_new_animation(
+                    ctx,
                     self.scoring.maxcombo_accumulator,
                     matching.get_unique_matching_blocks_indexes(),
                 );
@@ -496,7 +494,7 @@ impl Playing {
 }
 
 impl StageTrait for Playing {
-    fn update(&mut self, input_event: Event) -> GameResult<Option<Stage>> {
+    fn update(&mut self, ctx: &Context, input_event: Event) -> GameResult<Option<Stage>> {
         //InputEvent::__print(&input_event);
         /*if let None = self.playing_state {
             self.new_game();
@@ -515,7 +513,9 @@ impl StageTrait for Playing {
             None => self.new_game(),
             Some(PlayingState::Ready) => self.update_state_ready(&input_event),
             Some(PlayingState::DescendingCargo) => self.update_state_descending_cargo(&input_event),
-            Some(PlayingState::HandlingMatches) => self.update_state_handling_matches(&input_event),
+            Some(PlayingState::HandlingMatches) => {
+                self.update_state_handling_matches(ctx, &input_event);
+            }
             Some(PlayingState::Pause) => self.update_state_pause(&input_event),
             Some(PlayingState::GameOver) => self.update_state_game_over(&input_event),
             Some(PlayingState::QuittingToMainMenu) => {

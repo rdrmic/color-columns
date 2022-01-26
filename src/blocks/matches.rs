@@ -8,10 +8,13 @@ use ggez::{
 
 use crate::{
     blocks::idx_pair_to_center_point_of_block,
-    constants::{MATCH_COMBO_POINTS_CHAR_SCALE, MATCH_DIRECTION_INDICATOR_WIDTH},
+    constants::{
+        BLOCK_SIZE, GAME_ARENA_RECT, MATCH_COMBO_POINTS_CHAR_SCALE, MATCH_DIRECTION_INDICATOR_WIDTH,
+    },
 };
 
 use super::{
+    idx_to_position,
     pile::{Matches, Pile},
     Block,
 };
@@ -156,38 +159,91 @@ impl ComboPointsAnimationsHolder {
     pub fn new(font: Font) -> Self {
         Self {
             font,
-            current_animations: Vec::with_capacity(5),
+            current_animations: Vec::with_capacity(4),
         }
     }
 
     pub fn start_new_animation(
         &mut self,
+        ctx: &Context,
         points: usize,
         matching_blocks_indexes: &HashSet<[usize; 2]>,
     ) {
+        let points_bckg = Text::new(TextFragment {
+            text: points.to_string(),
+            color: Some(Color::BLACK),
+            font: Some(self.font),
+            scale: Some(PxScale::from(MATCH_COMBO_POINTS_CHAR_SCALE)),
+        });
+        let points = Text::new(TextFragment {
+            text: points.to_string(),
+            color: Some(Color::WHITE),
+            font: Some(self.font),
+            scale: Some(PxScale::from(MATCH_COMBO_POINTS_CHAR_SCALE)),
+        });
+
+        let points_rect = points.dimensions(ctx);
+        let points_dimensions = [points_rect.w, points_rect.h];
         let starting_position =
-            Self::calculate_animation_starting_position(matching_blocks_indexes);
-        let new_animation = ComboPointsAnimation::new(points, starting_position, self.font);
+            Self::calculate_animation_starting_position(matching_blocks_indexes, points_dimensions);
+
+        let new_animation = ComboPointsAnimation::new(points_bckg, points, starting_position);
         self.current_animations.push(new_animation);
     }
 
     fn calculate_animation_starting_position(
-        matching_blocks_indexes: &HashSet<[usize; 2]>,
+        unique_matching_blocks_indexes: &HashSet<[usize; 2]>,
+        points_dimensions: [f32; 2],
     ) -> Point2<f32> {
         #[allow(clippy::unwrap_used)]
-        let highest_y_idx = matching_blocks_indexes
+        let leftmost_x_idx = unique_matching_blocks_indexes
+            .iter()
+            .map(|point| point[0])
+            .reduce(|accum, item| if accum <= item { accum } else { item })
+            .unwrap();
+        let leftmost_position = idx_to_position(leftmost_x_idx, 'x');
+        #[allow(clippy::unwrap_used)]
+        let rightmost_x_idx = unique_matching_blocks_indexes
+            .iter()
+            .map(|point| point[0])
+            .reduce(|accum, item| if accum >= item { accum } else { item })
+            .unwrap();
+        let rightmost_position = idx_to_position(rightmost_x_idx, 'x');
+        let mut horizontal_middle_position =
+            (leftmost_position + rightmost_position + BLOCK_SIZE) / 2.0;
+
+        #[allow(clippy::unwrap_used)]
+        let highest_y_idx = unique_matching_blocks_indexes
             .iter()
             .map(|point| point[1])
             .reduce(|accum, item| if accum >= item { accum } else { item })
             .unwrap();
+        let highest_position = idx_to_position(highest_y_idx, 'y');
         #[allow(clippy::unwrap_used)]
-        let highest_rightmost_idx_pair = matching_blocks_indexes
+        let lowest_y_idx = unique_matching_blocks_indexes
             .iter()
-            .filter(|point| point[1] == highest_y_idx)
-            .reduce(|accum, item| if accum[0] >= item[0] { accum } else { item })
+            .map(|point| point[1])
+            .reduce(|accum, item| if accum <= item { accum } else { item })
             .unwrap();
+        let lowest_position = idx_to_position(lowest_y_idx, 'y');
+        let mut vertical_middle_position = (highest_position + lowest_position) / 2.0;
 
-        idx_pair_to_center_point_of_block(highest_rightmost_idx_pair)
+        let points_width = points_dimensions[0];
+        let horizontal_correction = points_width / 2.0;
+        horizontal_middle_position -= horizontal_correction;
+        if horizontal_middle_position < GAME_ARENA_RECT.left() + 1.0 {
+            horizontal_middle_position = GAME_ARENA_RECT.left() + 1.0;
+        } else if horizontal_middle_position + points_width + 2.0 > GAME_ARENA_RECT.right() {
+            horizontal_middle_position = GAME_ARENA_RECT.right() - points_width - 2.0;
+        }
+
+        let vertical_correction = points_dimensions[1] / 6.0;
+        vertical_middle_position += vertical_correction;
+
+        Point2 {
+            x: horizontal_middle_position,
+            y: vertical_middle_position,
+        }
     }
 
     pub fn update_animations(&mut self) {
@@ -227,57 +283,45 @@ impl ComboPointsAnimationsHolder {
 
 #[derive(Debug)]
 pub struct ComboPointsAnimation {
-    points: usize,
+    points_bckg: Text,
+    points: Text,
     position: Point2<f32>,
-    font: Font,
-    bckg_color: Color,
+    color_bckg: Color,
     color: Color,
     alpha: f32,
 }
 
 impl ComboPointsAnimation {
-    pub fn new(points: usize, position: Point2<f32>, font: Font) -> Self {
+    pub fn new(points_bckg: Text, points: Text, position: Point2<f32>) -> Self {
         Self {
+            points_bckg,
             points,
             position,
-            font,
-            bckg_color: Color::BLACK,
+            color_bckg: Color::BLACK,
             color: Color::WHITE,
             alpha: 1.0,
         }
     }
 
     pub fn update(&mut self) -> bool {
-        /*println!(
-            "\n*** UPDATE ANIMATION: {} // {:?}",
-            self.points, self.position
-        );*/
-
         self.position.x += 0.05;
-        self.position.y -= 0.6;
+        self.position.y -= 0.5;
 
-        self.bckg_color.a = self.alpha;
+        self.color_bckg.a = self.alpha;
+        self.points_bckg.fragments_mut()[0].color = Some(self.color_bckg);
+
         self.color.a = self.alpha;
+        self.points.fragments_mut()[0].color = Some(self.color);
+
         if self.alpha <= 0.0 {
             return true;
         }
-        self.alpha -= 0.016;
+        self.alpha -= 0.015;
         false
     }
 
     pub fn draw(&mut self, ctx: &mut Context) -> GameResult {
-        /*println!(
-            "*** DRAW ANIMATION: {:?} - {:?} \t// next alpha: {}\n",
-            self.bckg_color, self.color, self.alpha
-        );*/
-
         // OUTLINE
-        let points_bckg = Text::new(TextFragment {
-            text: self.points.to_string(),
-            color: Some(self.bckg_color),
-            font: Some(self.font),
-            scale: Some(PxScale::from(MATCH_COMBO_POINTS_CHAR_SCALE)),
-        });
         let bckg_offset = 1.5;
         let mut bckg_position;
         // up
@@ -285,57 +329,51 @@ impl ComboPointsAnimation {
             x: self.position.x,
             y: self.position.y - bckg_offset,
         };
-        graphics::queue_text(ctx, &points_bckg, bckg_position, None);
+        graphics::queue_text(ctx, &self.points_bckg, bckg_position, None);
         // upper-right corner
         bckg_position = Point2 {
             x: self.position.x + bckg_offset,
             y: self.position.y - bckg_offset,
         };
-        graphics::queue_text(ctx, &points_bckg, bckg_position, None);
+        graphics::queue_text(ctx, &self.points_bckg, bckg_position, None);
         // right
         bckg_position = Point2 {
             x: self.position.x + bckg_offset,
             y: self.position.y,
         };
-        graphics::queue_text(ctx, &points_bckg, bckg_position, None);
+        graphics::queue_text(ctx, &self.points_bckg, bckg_position, None);
         // lower-right corner
         bckg_position = Point2 {
             x: self.position.x + bckg_offset,
             y: self.position.y + bckg_offset,
         };
-        graphics::queue_text(ctx, &points_bckg, bckg_position, None);
+        graphics::queue_text(ctx, &self.points_bckg, bckg_position, None);
         // down
         bckg_position = Point2 {
             x: self.position.x,
             y: self.position.y + bckg_offset,
         };
-        graphics::queue_text(ctx, &points_bckg, bckg_position, None);
+        graphics::queue_text(ctx, &self.points_bckg, bckg_position, None);
         // lower-left corner
         bckg_position = Point2 {
             x: self.position.x - bckg_offset,
             y: self.position.y + bckg_offset,
         };
-        graphics::queue_text(ctx, &points_bckg, bckg_position, None);
+        graphics::queue_text(ctx, &self.points_bckg, bckg_position, None);
         // left
         bckg_position = Point2 {
             x: self.position.x - bckg_offset,
             y: self.position.y,
         };
-        graphics::queue_text(ctx, &points_bckg, bckg_position, None);
+        graphics::queue_text(ctx, &self.points_bckg, bckg_position, None);
         // upper-left corner
         bckg_position = Point2 {
             x: self.position.x - bckg_offset,
             y: self.position.y - bckg_offset,
         };
-        graphics::queue_text(ctx, &points_bckg, bckg_position, None);
+        graphics::queue_text(ctx, &self.points_bckg, bckg_position, None);
 
-        let points = Text::new(TextFragment {
-            text: self.points.to_string(),
-            color: Some(self.color),
-            font: Some(self.font),
-            scale: Some(PxScale::from(MATCH_COMBO_POINTS_CHAR_SCALE)),
-        });
-        graphics::queue_text(ctx, &points, self.position, None);
+        graphics::queue_text(ctx, &self.points, self.position, None);
 
         graphics::draw_queued_text(
             ctx,

@@ -13,6 +13,6 @@
 . . . . . . . . .
 . . . . . . . . .
 . . . . . . . . .
-G G . O O . R R .
-Y Y . R R . B B .
-O O . G G . M M .
+G . . Y Y . . . .
+Y G . M M . R R O
+G G . R R . B B O

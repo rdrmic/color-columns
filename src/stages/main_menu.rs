@@ -186,7 +186,7 @@ impl MainMenu {
 }
 
 impl StageTrait for MainMenu {
-    fn update(&mut self, input_event: Event) -> GameResult<Option<Stage>> {
+    fn update(&mut self, _ctx: &Context, input_event: Event) -> GameResult<Option<Stage>> {
         let previous_selected_item_idx = self.selected_item_idx;
         match input_event {
             Event::Down => {

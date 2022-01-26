@@ -75,7 +75,7 @@ impl About {
 }
 
 impl StageTrait for About {
-    fn update(&mut self, input_event: Event) -> GameResult<Option<Stage>> {
+    fn update(&mut self, _ctx: &Context, input_event: Event) -> GameResult<Option<Stage>> {
         if let Event::Escape = input_event {
             //println!("### Stage::About -> Stage::MainMenu");
             return Ok(Some(Stage::MainMenu));
