@@ -20,14 +20,14 @@ impl NavigationInstructions {
         let label_factory = Factory::new(font);
         Self {
             // PLAYING
-            playing_ready: label_factory.create_label("'Enter' to start\n'Esc' to main menu"),
-            playing_go: label_factory.create_label("Press 'Esc' to pause"),
+            playing_ready: label_factory.create_label("[Enter] to start\n[Esc] to main menu"),
+            playing_go: label_factory.create_label("Press [Esc] to pause"),
             playing_pause: label_factory
-                .create_label("'Enter' to continue\n'Esc' to exit to main menu"),
+                .create_label("[Enter] to continue\n[Esc] to exit to main menu"),
             playing_gameover: label_factory
-                .create_label("'Enter' for a new game\n'Esc' to main menu"),
+                .create_label("[Enter] for a new game\n[Esc] to main menu"),
             // HOW TO PLAY & ABOUT
-            go_back: label_factory.create_label("'Esc' to main menu"),
+            go_back: label_factory.create_label("[Esc] to main menu"),
         }
     }
 
