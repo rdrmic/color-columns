@@ -316,7 +316,7 @@ impl ComboPointsAnimation {
         if self.alpha <= 0.0 {
             return true;
         }
-        self.alpha -= 0.015;
+        self.alpha -= 0.016;
         false
     }
 

@@ -1,13 +1,17 @@
 use ggez::{
-    graphics::{self, Align, DrawParam, PxScale, Text, TextFragment},
+    graphics::{self, Align, DrawParam, Font, PxScale, Text, TextFragment},
     Context, GameResult,
 };
 use glam::Vec2;
+use rand::prelude::{SliceRandom, ThreadRng};
 
 use crate::{
+    blocks,
     constants::{
-        APP_NAME, COLOR_GREEN, COLOR_ORANGE, HOWTOPLAY_AND_ABOUT_AREA_WIDTH,
-        TITLE_SCREEN_TITLE_AREA_WIDTH, TITLE_SCREEN_TITLE_CHAR_SCALE, TITLE_SCREEN_TITLE_POSITION,
+        APP_NAME, COLOR_ORANGE, COLOR_RED, NO_BLOCK_CODE, TITLE_SCREEN_AREA_WIDTH,
+        TITLE_SCREEN_NAVIGATION_INSTRUCTIONS_CHAR_SCALE,
+        TITLE_SCREEN_NAVIGATION_INSTRUCTIONS_POSITION, TITLE_SCREEN_NUM_FRAMES_FOR_ANIMATION,
+        TITLE_SCREEN_TITLE_CHAR_SCALE, TITLE_SCREEN_TITLE_POSITION,
     },
     input::Event,
     resources::Resources,
@@ -17,36 +21,119 @@ use super::{Stage, StageTrait};
 
 pub struct TitleScreen {
     title: Text,
-    main_menu_navigation_instructions: Text,
+    navigation_instructions: Text,
+    num_frames: usize,
+    rng: ThreadRng,
+    previous_frame_title_colors_codes: [char; APP_NAME.len()],
 }
 
 impl TitleScreen {
     pub fn new(resources: &Resources) -> Self {
-        let mut title = Text::new(TextFragment {
-            text: APP_NAME.to_string(),
-            color: Some(COLOR_GREEN),
-            font: Some(resources.get_fonts().bold),
-            scale: Some(PxScale::from(TITLE_SCREEN_TITLE_CHAR_SCALE)),
-        });
+        let fonts = resources.get_fonts();
+
+        let mut title = Text::default();
+        for char in APP_NAME.chars() {
+            title.add(TextFragment {
+                text: char.to_string(),
+                color: None,
+                font: Some(fonts.bold),
+                scale: Some(PxScale::from(TITLE_SCREEN_TITLE_CHAR_SCALE)),
+            });
+        }
         title.set_bounds(
-            Vec2::new(TITLE_SCREEN_TITLE_AREA_WIDTH, f32::INFINITY),
+            Vec2::new(TITLE_SCREEN_AREA_WIDTH, f32::INFINITY),
             Align::Center,
         );
 
-        let mut main_menu_navigation_instructions = Text::new(TextFragment {
-            text: "Navigate the menu using [Enter] / [Escape] and [Up] / [Down] keys".to_string(),
-            color: Some(COLOR_ORANGE),
-            font: Some(resources.get_fonts().light_italic),
-            scale: Some(PxScale::from(16.0)),
-        });
-        main_menu_navigation_instructions.set_bounds(
-            Vec2::new(HOWTOPLAY_AND_ABOUT_AREA_WIDTH, f32::INFINITY),
+        let mut navigation_instructions =
+            Self::create_navigation_instructions_text(fonts.light_italic);
+        navigation_instructions.set_bounds(
+            Vec2::new(TITLE_SCREEN_AREA_WIDTH, f32::INFINITY),
             Align::Center,
         );
 
         Self {
             title,
-            main_menu_navigation_instructions,
+            navigation_instructions,
+            num_frames: 0,
+            rng: rand::thread_rng(),
+            previous_frame_title_colors_codes: [NO_BLOCK_CODE; APP_NAME.len()],
+        }
+    }
+
+    // "Navigate the menu using [Enter] / [Escape] and [Up] / [Down] keys"
+    fn create_navigation_instructions_text(font: Font) -> Text {
+        let mut text = Text::new(
+            Self::create_navigation_instructions_textfragment_decription_text(
+                font,
+                "Navigate the menu using ",
+            ),
+        );
+        text.add(Self::create_navigation_instructions_textfragment_key(
+            font, "Enter",
+        ));
+        text.add(Self::create_navigation_instructions_textfragment_decription_text(font, " / "));
+        text.add(Self::create_navigation_instructions_textfragment_key(
+            font, "Escape",
+        ));
+
+        text.add(Self::create_navigation_instructions_textfragment_decription_text(font, " and "));
+        text.add(Self::create_navigation_instructions_textfragment_key(
+            font, "Up",
+        ));
+        text.add(Self::create_navigation_instructions_textfragment_decription_text(font, " / "));
+        text.add(Self::create_navigation_instructions_textfragment_key(
+            font, "Down",
+        ));
+        text.add(Self::create_navigation_instructions_textfragment_decription_text(font, " keys"));
+        text
+    }
+
+    // FIXME avoid font as parameter
+    fn create_navigation_instructions_textfragment_decription_text(
+        font: Font,
+        key: &str,
+    ) -> TextFragment {
+        TextFragment {
+            text: key.to_string(),
+            color: Some(COLOR_ORANGE),
+            font: Some(font),
+            scale: Some(PxScale::from(
+                TITLE_SCREEN_NAVIGATION_INSTRUCTIONS_CHAR_SCALE,
+            )),
+        }
+    }
+
+    // FIXME avoid font as parameter
+    fn create_navigation_instructions_textfragment_key(font: Font, key: &str) -> TextFragment {
+        TextFragment {
+            text: format!("[{}]", key),
+            color: Some(COLOR_RED),
+            font: Some(font),
+            scale: Some(PxScale::from(
+                TITLE_SCREEN_NAVIGATION_INSTRUCTIONS_CHAR_SCALE,
+            )),
+        }
+    }
+
+    fn shuffle_title_colors(&mut self) {
+        let mut prev_color_code = NO_BLOCK_CODE;
+        let mut new_random_color;
+        for (char_frag_idx, char_frag) in self.title.fragments_mut().iter_mut().enumerate() {
+            let mut new_color_code;
+            #[allow(clippy::unwrap_used)]
+            loop {
+                new_random_color = blocks::Factory::COLORS.choose(&mut self.rng).unwrap();
+                new_color_code = new_random_color.code;
+                if new_color_code != prev_color_code
+                    && new_color_code != self.previous_frame_title_colors_codes[char_frag_idx]
+                {
+                    break;
+                }
+            }
+            char_frag.color = Some(new_random_color.color);
+            prev_color_code = new_color_code;
+            self.previous_frame_title_colors_codes[char_frag_idx] = new_color_code;
         }
     }
 }
@@ -56,7 +143,13 @@ impl StageTrait for TitleScreen {
         match input_event {
             Event::Enter => Ok(Some(Stage::MainMenu)),
             Event::Escape => Ok(None),
-            _ => Ok(Some(Stage::TitleScreen)),
+            _ => {
+                self.num_frames += 1;
+                if self.num_frames % TITLE_SCREEN_NUM_FRAMES_FOR_ANIMATION == 0 {
+                    self.shuffle_title_colors();
+                }
+                Ok(Some(Stage::TitleScreen))
+            }
         }
     }
 
@@ -72,8 +165,11 @@ impl StageTrait for TitleScreen {
         );
         graphics::queue_text(
             ctx,
-            &self.main_menu_navigation_instructions,
-            Vec2::new(50.0, 278.0),
+            &self.navigation_instructions,
+            Vec2::new(
+                TITLE_SCREEN_NAVIGATION_INSTRUCTIONS_POSITION[0],
+                TITLE_SCREEN_NAVIGATION_INSTRUCTIONS_POSITION[1],
+            ),
             None,
         );
 

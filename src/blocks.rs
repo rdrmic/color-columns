@@ -137,8 +137,8 @@ impl Factory {
     pub fn create_next_cargo(&mut self) -> Cargo {
         let mut color_block_randomly = |point| {
             #[allow(clippy::unwrap_used)]
-            let color = Self::COLORS.choose(&mut self.rng).unwrap();
-            Block::new(point, BLOCK_SIZE, *color)
+            let random_color = Self::COLORS.choose(&mut self.rng).unwrap();
+            Block::new(point, BLOCK_SIZE, *random_color)
         };
 
         let x = GAME_ARENA_RECT.left() - GAME_ARENA_MARGIN_LEFT;
@@ -177,14 +177,14 @@ impl Factory {
     }
 
     pub fn change_block_color_randomly(&mut self, block: &mut Block) {
-        let mut new_block_color;
+        let mut new_random_block_color;
         #[allow(clippy::unwrap_used)]
         loop {
-            new_block_color = Self::COLORS.choose(&mut self.rng).unwrap();
-            if new_block_color.code != block.color.code {
+            new_random_block_color = Self::COLORS.choose(&mut self.rng).unwrap();
+            if new_random_block_color.code != block.color.code {
                 break;
             }
         }
-        block.color = *new_block_color;
+        block.color = *new_random_block_color;
     }
 }

@@ -9,7 +9,7 @@ license = "MIT"
 repository = "https://github.com/rdrmic/color-columns"
 build = "build.rs"
 edition = "2021"
-version = "0.1.7"
+version = "0.1.8"
 
 [dependencies]
 ggez = "0.7"
