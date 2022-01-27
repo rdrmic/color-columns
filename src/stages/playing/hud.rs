@@ -301,8 +301,8 @@ impl Hud {
                 ctx,
                 &game_info.playing_state,
                 Vec2::new(
-                    HUD_LABEL_PLAYING_STATE_POSITION.0,
-                    HUD_LABEL_PLAYING_STATE_POSITION.1,
+                    HUD_LABEL_PLAYING_STATE_POSITION[0],
+                    HUD_LABEL_PLAYING_STATE_POSITION[1],
                 ),
                 None,
             );
@@ -311,8 +311,8 @@ impl Hud {
                     ctx,
                     game_info_instructions,
                     Vec2::new(
-                        HUD_LABEL_INSTRUCTIONS_POSITION.0,
-                        HUD_LABEL_INSTRUCTIONS_POSITION.1,
+                        HUD_LABEL_INSTRUCTIONS_POSITION[0],
+                        HUD_LABEL_INSTRUCTIONS_POSITION[1],
                     ),
                     None,
                 );
@@ -322,26 +322,29 @@ impl Hud {
         graphics::queue_text(
             ctx,
             &self.labels.scoring_score,
-            Vec2::new(HUD_LABEL_SCORE_POSITION.0, HUD_LABEL_SCORE_POSITION.1),
+            Vec2::new(HUD_LABEL_SCORE_POSITION[0], HUD_LABEL_SCORE_POSITION[1]),
             None,
         );
         graphics::queue_text(
             ctx,
             &self.scoring_values.score,
-            Vec2::new(HUD_SCORE_POSITION.0, HUD_SCORE_POSITION.1),
+            Vec2::new(HUD_SCORE_POSITION[0], HUD_SCORE_POSITION[1]),
             None,
         );
         // MAX COMBO
         graphics::queue_text(
             ctx,
             &self.labels.scoring_maxcombo,
-            Vec2::new(HUD_LABEL_MAXCOMBO_POSITION.0, HUD_LABEL_MAXCOMBO_POSITION.1),
+            Vec2::new(
+                HUD_LABEL_MAXCOMBO_POSITION[0],
+                HUD_LABEL_MAXCOMBO_POSITION[1],
+            ),
             None,
         );
         graphics::queue_text(
             ctx,
             &self.scoring_values.maxcombo,
-            Vec2::new(HUD_MAXCOMBO_POSITION.0, HUD_MAXCOMBO_POSITION.1),
+            Vec2::new(HUD_MAXCOMBO_POSITION[0], HUD_MAXCOMBO_POSITION[1]),
             None,
         );
         // HIGHSCORE
@@ -349,15 +352,15 @@ impl Hud {
             ctx,
             &self.labels.scoring_highscore,
             Vec2::new(
-                HUD_LABEL_HIGHSCORE_POSITION.0,
-                HUD_LABEL_HIGHSCORE_POSITION.1,
+                HUD_LABEL_HIGHSCORE_POSITION[0],
+                HUD_LABEL_HIGHSCORE_POSITION[1],
             ),
             None,
         );
         graphics::queue_text(
             ctx,
             &self.scoring_values.highscore,
-            Vec2::new(HUD_HIGHSCORE_POSITION.0, HUD_HIGHSCORE_POSITION.1),
+            Vec2::new(HUD_HIGHSCORE_POSITION[0], HUD_HIGHSCORE_POSITION[1]),
             None,
         );
 

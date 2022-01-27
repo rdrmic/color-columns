@@ -87,21 +87,21 @@ impl StageTrait for About {
         graphics::queue_text(
             ctx,
             &self.go_back_instruction,
-            Vec2::new(GO_BACK_LABEL_POSITION.0, GO_BACK_LABEL_POSITION.1),
+            Vec2::new(GO_BACK_LABEL_POSITION[0], GO_BACK_LABEL_POSITION[1]),
             None,
         );
         graphics::queue_text(
             ctx,
             &self.about,
-            Vec2::new(ABOUT_TEXT_POSITION.0, ABOUT_TEXT_POSITION.1),
+            Vec2::new(ABOUT_TEXT_POSITION[0], ABOUT_TEXT_POSITION[1]),
             None,
         );
         graphics::queue_text(
             ctx,
             &self.version,
             Vec2::new(
-                ABOUT_VERSION_AND_BUILDTIME_POSITION.0,
-                ABOUT_VERSION_AND_BUILDTIME_POSITION.1,
+                ABOUT_VERSION_AND_BUILDTIME_POSITION[0],
+                ABOUT_VERSION_AND_BUILDTIME_POSITION[1],
             ),
             None,
         );

@@ -20,8 +20,8 @@ use crate::{
     input::Event,
     resources::Resources,
     stages::{
-        about::About, how_to_play::HowToPlay, main_menu::MainMenu, playing::Playing, Stage,
-        StageTrait,
+        about::About, how_to_play::HowToPlay, main_menu::MainMenu, playing::Playing,
+        title_screen::TitleScreen, Stage, StageTrait,
     },
 };
 
@@ -67,7 +67,7 @@ pub fn run() {
     graphics::window(&ctx).set_visible(true);
 
     // CREATE APP STATE
-    let app = App::new(&mut ctx, Stage::MainMenu);
+    let app = App::new(&mut ctx, Stage::TitleScreen);
 
     // RUN MAIN LOOP
     event::run(ctx, event_loop, app);
@@ -130,6 +130,7 @@ impl App {
         let resources = Resources::new(ctx);
         Self {
             stages: vec![
+                Box::new(TitleScreen::new(&resources)),
                 Box::new(MainMenu::new(&resources, ctx)),
                 Box::new(Playing::new(&resources)),
                 Box::new(HowToPlay::new(&resources)),
@@ -142,6 +143,7 @@ impl App {
 
     fn get_currrent_stage(&mut self) -> &mut Box<dyn StageTrait> {
         match self.current_stage {
+            Stage::TitleScreen => &mut self.stages[Stage::TitleScreen as usize],
             Stage::MainMenu => &mut self.stages[Stage::MainMenu as usize],
             Stage::Playing => &mut self.stages[Stage::Playing as usize],
             Stage::HowToPlay => &mut self.stages[Stage::HowToPlay as usize],

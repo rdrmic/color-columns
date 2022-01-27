@@ -114,7 +114,7 @@ impl StageTrait for HowToPlay {
         graphics::queue_text(
             ctx,
             &self.go_back_instruction,
-            Vec2::new(GO_BACK_LABEL_POSITION.0, GO_BACK_LABEL_POSITION.1),
+            Vec2::new(GO_BACK_LABEL_POSITION[0], GO_BACK_LABEL_POSITION[1]),
             None,
         );
         graphics::queue_text(
@@ -156,8 +156,8 @@ impl StageTrait for HowToPlay {
             ctx,
             &self.scoring_rules,
             Vec2::new(
-                HOWTOPLAY_SCORING_RULES_TEXT_POSITION.0,
-                HOWTOPLAY_SCORING_RULES_TEXT_POSITION.1,
+                HOWTOPLAY_SCORING_RULES_TEXT_POSITION[0],
+                HOWTOPLAY_SCORING_RULES_TEXT_POSITION[1],
             ),
             None,
         );
