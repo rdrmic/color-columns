@@ -42,6 +42,6 @@ VERSION     DATE                SIZE-CODE       SIZE-EXE        SIZE-DIST
     - Eased game-over conditions
     - Improved navigation instructions
     - Added title screen
-0.1.8       27.01.2022         122,0 KB         3,62 MB         4,71 MB
+0.1.8       27.01.2022         124,0 KB         3,63 MB         4,72 MB
     - Added title screen animation
     - Added blocks delimiters in "How to play" screen
