@@ -6,13 +6,15 @@ use ggez::{
 use glam::Vec2;
 
 use crate::{
+    blocks::Block,
     constants::{
-        COLOR_GRAY, COLOR_GREEN, COLOR_ORANGE, COLOR_YELLOW, GO_BACK_LABEL_POSITION,
-        HOWTOPLAY_AND_ABOUT_AREA_WIDTH, HOWTOPLAY_CONTROLS_CHAR_SCALE,
+        BLOCK_COLOR_BLUE, BLOCK_COLOR_GREEN, BLOCK_COLOR_MAGENTA, BLOCK_COLOR_ORANGE,
+        BLOCK_COLOR_RED, BLOCK_COLOR_YELLOW, COLOR_GREEN, COLOR_ORANGE, COLOR_YELLOW,
+        GO_BACK_LABEL_POSITION, HOWTOPLAY_AND_ABOUT_AREA_WIDTH, HOWTOPLAY_CONTROLS_CHAR_SCALE,
         HOWTOPLAY_CONTROLS_LEFTSIDE_TEXT_POSITION_X, HOWTOPLAY_CONTROLS_RIGHTSIDE_TEXT_POSITION_X,
-        HOWTOPLAY_CONTROLS_TEXT_POSITION_Y, HOWTOPLAY_LINE_DELIMITER_END_POSITION_X,
-        HOWTOPLAY_LINE_DELIMITER_POSITION_Y, HOWTOPLAY_LINE_DELIMITER_START_POSITION_X,
-        HOWTOPLAY_LINE_DELIMITER_WIDTH, HOWTOPLAY_SCORING_CHAR_SCALE,
+        HOWTOPLAY_CONTROLS_TEXT_POSITION_Y, HOWTOPLAY_HEADER_BLOCK_SIZE,
+        HOWTOPLAY_HEADER_CONTROLS_POSITION_Y, HOWTOPLAY_HEADER_POSITION_X,
+        HOWTOPLAY_HEADER_SCORING_RULES_POSITION_Y, HOWTOPLAY_SCORING_RULES_CHAR_SCALE,
         HOWTOPLAY_SCORING_RULES_TEXT_POSITION,
     },
     input::Event,
@@ -22,6 +24,8 @@ use crate::{
 use super::{Stage, StageTrait};
 
 pub struct HowToPlay {
+    blocks_header_controls: [Block; 3],
+    blocks_header_scoring_rules: [Block; 3],
     go_back_instruction: Text,
     controls_leftside: Text,
     controls_rightside: Text,
@@ -82,7 +86,7 @@ impl HowToPlay {
             text: scoring_rules_str.to_string(),
             color: Some(COLOR_GREEN),
             font: Some(font),
-            scale: Some(PxScale::from(HOWTOPLAY_SCORING_CHAR_SCALE)),
+            scale: Some(PxScale::from(HOWTOPLAY_SCORING_RULES_CHAR_SCALE)),
         });
         scoring_rules.set_bounds(
             Vec2::new(HOWTOPLAY_AND_ABOUT_AREA_WIDTH, f32::INFINITY),
@@ -90,6 +94,8 @@ impl HowToPlay {
         );
 
         Self {
+            blocks_header_controls: Self::create_header_for_controls(),
+            blocks_header_scoring_rules: Self::create_header_for_scoring_rules(),
             go_back_instruction: resources
                 .get_navigation_instructions()
                 .get_go_back()
@@ -98,6 +104,64 @@ impl HowToPlay {
             controls_rightside,
             scoring_rules,
         }
+    }
+
+    fn create_header_for_controls() -> [Block; 3] {
+        [
+            Block::new(
+                Point2 {
+                    x: HOWTOPLAY_HEADER_POSITION_X,
+                    y: HOWTOPLAY_HEADER_CONTROLS_POSITION_Y,
+                },
+                HOWTOPLAY_HEADER_BLOCK_SIZE,
+                BLOCK_COLOR_BLUE,
+            ),
+            Block::new(
+                Point2 {
+                    x: HOWTOPLAY_HEADER_POSITION_X + HOWTOPLAY_HEADER_BLOCK_SIZE,
+                    y: HOWTOPLAY_HEADER_CONTROLS_POSITION_Y,
+                },
+                HOWTOPLAY_HEADER_BLOCK_SIZE,
+                BLOCK_COLOR_YELLOW,
+            ),
+            Block::new(
+                Point2 {
+                    x: HOWTOPLAY_HEADER_BLOCK_SIZE.mul_add(2.0, HOWTOPLAY_HEADER_POSITION_X),
+                    y: HOWTOPLAY_HEADER_CONTROLS_POSITION_Y,
+                },
+                HOWTOPLAY_HEADER_BLOCK_SIZE,
+                BLOCK_COLOR_GREEN,
+            ),
+        ]
+    }
+
+    fn create_header_for_scoring_rules() -> [Block; 3] {
+        [
+            Block::new(
+                Point2 {
+                    x: HOWTOPLAY_HEADER_POSITION_X,
+                    y: HOWTOPLAY_HEADER_SCORING_RULES_POSITION_Y,
+                },
+                HOWTOPLAY_HEADER_BLOCK_SIZE,
+                BLOCK_COLOR_RED,
+            ),
+            Block::new(
+                Point2 {
+                    x: HOWTOPLAY_HEADER_POSITION_X + HOWTOPLAY_HEADER_BLOCK_SIZE,
+                    y: HOWTOPLAY_HEADER_SCORING_RULES_POSITION_Y,
+                },
+                HOWTOPLAY_HEADER_BLOCK_SIZE,
+                BLOCK_COLOR_ORANGE,
+            ),
+            Block::new(
+                Point2 {
+                    x: HOWTOPLAY_HEADER_BLOCK_SIZE.mul_add(2.0, HOWTOPLAY_HEADER_POSITION_X),
+                    y: HOWTOPLAY_HEADER_SCORING_RULES_POSITION_Y,
+                },
+                HOWTOPLAY_HEADER_BLOCK_SIZE,
+                BLOCK_COLOR_MAGENTA,
+            ),
+        ]
     }
 }
 
@@ -111,12 +175,20 @@ impl StageTrait for HowToPlay {
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+        for mut block in self.blocks_header_controls {
+            block.draw(ctx)?;
+        }
+        for mut block in self.blocks_header_scoring_rules {
+            block.draw(ctx)?;
+        }
+
         graphics::queue_text(
             ctx,
             &self.go_back_instruction,
             Vec2::new(GO_BACK_LABEL_POSITION[0], GO_BACK_LABEL_POSITION[1]),
             None,
         );
+
         graphics::queue_text(
             ctx,
             &self.controls_leftside,
@@ -135,22 +207,6 @@ impl StageTrait for HowToPlay {
             ),
             None,
         );
-
-        let start_point: Point2<f32> = Point2 {
-            x: HOWTOPLAY_LINE_DELIMITER_START_POSITION_X,
-            y: HOWTOPLAY_LINE_DELIMITER_POSITION_Y,
-        };
-        let end_point: Point2<f32> = Point2 {
-            x: HOWTOPLAY_LINE_DELIMITER_END_POSITION_X,
-            y: HOWTOPLAY_LINE_DELIMITER_POSITION_Y,
-        };
-        let separating_line = graphics::Mesh::new_line(
-            ctx,
-            &[start_point, end_point],
-            HOWTOPLAY_LINE_DELIMITER_WIDTH,
-            COLOR_GRAY,
-        )?;
-        graphics::draw(ctx, &separating_line, DrawParam::default())?;
 
         graphics::queue_text(
             ctx,

@@ -44,4 +44,4 @@ VERSION     DATE                SIZE-CODE       SIZE-EXE        SIZE-DIST
     - Added title screen
 0.1.8       27.01.2022         122,0 KB         3,62 MB         4,71 MB
     - Added title screen animation
-
+    - Added blocks delimiters in "How to play" screen
